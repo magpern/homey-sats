@@ -1,0 +1,127 @@
+<html>
+<head>
+  <style>
+    /* Sized for wall tablets: large type, high contrast, no hover-only information. */
+    .sats { font-size: var(--homey-font-size-default, 17px); line-height: 1.35; }
+    .sats-day {
+      margin: var(--homey-su-3, 12px) 0 var(--homey-su-1, 4px);
+      font-weight: var(--homey-font-weight-bold, 700);
+      color: var(--homey-text-color-light, #888);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.85em;
+    }
+    .sats-day:first-child { margin-top: 0; }
+    .sats-row {
+      display: grid;
+      grid-template-columns: 4.2em 1fr auto;
+      gap: 0 var(--homey-su-2, 8px);
+      padding: var(--homey-su-2, 8px) 0;
+      border-bottom: 1px solid var(--homey-line-color, rgba(128, 128, 128, 0.2));
+    }
+    .sats-time { font-weight: var(--homey-font-weight-bold, 700); font-size: 1.15em; }
+    .sats-class { font-weight: var(--homey-font-weight-medium, 600); }
+    .sats-meta { color: var(--homey-text-color-light, #888); font-size: 0.9em; grid-column: 2 / 4; }
+    .sats-status { text-align: right; white-space: nowrap; }
+    .badge {
+      display: inline-block;
+      padding: 0.1em 0.55em;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: var(--homey-font-weight-bold, 700);
+      margin-left: 0.3em;
+    }
+    .badge-booked { background: rgba(46, 160, 67, 0.18); color: var(--homey-color-green, #2ea043); }
+    .badge-waitlist { background: rgba(219, 155, 0, 0.18); color: var(--homey-color-orange, #b07800); }
+    .badge-cancelled { background: rgba(220, 53, 69, 0.15); color: var(--homey-color-red, #d73a49); }
+    .badge-away { background: rgba(110, 110, 110, 0.18); color: var(--homey-text-color, inherit); }
+    .sats-row.cancelled .sats-class { text-decoration: line-through; }
+    .sats-empty { text-align: center; padding: var(--homey-su-6, 24px) 0; color: var(--homey-text-color-light, #888); }
+  </style>
+</head>
+<body class="homey-widget">
+  <div id="root" class="sats"></div>
+
+  <script type="text/javascript">
+    function onHomeyReady(Homey) {
+      var root = document.getElementById('root');
+      var ready = false;
+      var t = function (key, fallback) {
+        try {
+          var v = Homey.__(key);
+          return v && v !== key ? v : fallback;
+        } catch (e) { return fallback; }
+      };
+
+      function el(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text !== undefined) n.textContent = text;
+        return n;
+      }
+
+      function badge(kind, text) {
+        return el('span', 'badge badge-' + kind, text);
+      }
+
+      function dayLabel(model, row) {
+        if (row.dayKey === model.todayKey) return t('widget.today', 'Today');
+        if (row.dayKey === model.tomorrowKey) return t('widget.tomorrow', 'Tomorrow');
+        var parts = row.dayKey.split('-');
+        return row.weekday + ' ' + Number(parts[2]) + '/' + Number(parts[1]);
+      }
+
+      function render(model) {
+        root.textContent = '';
+        if (!model.rows.length) {
+          root.appendChild(el('div', 'sats-empty', t('widget.empty', 'No booked classes in the next 7 days')));
+          return;
+        }
+        var lastDay = null;
+        model.rows.forEach(function (row) {
+          if (row.dayKey !== lastDay) {
+            root.appendChild(el('div', 'sats-day', dayLabel(model, row)));
+            lastDay = row.dayKey;
+          }
+          var r = el('div', 'sats-row ' + row.status);
+          r.appendChild(el('div', 'sats-time', row.time));
+          r.appendChild(el('div', 'sats-class', row.className));
+          var status = el('div', 'sats-status');
+          if (row.status === 'booked') status.appendChild(badge('booked', t('widget.booked', 'Booked')));
+          if (row.status === 'waitlist') {
+            var wl = t('widget.waitlist', 'Waiting list');
+            status.appendChild(badge('waitlist', row.position ? wl + ' #' + row.position : wl));
+          }
+          if (row.status === 'cancelled') status.appendChild(badge('cancelled', t('widget.cancelled', 'Cancelled')));
+          if (row.away) status.appendChild(badge('away', t('widget.away', 'Away')));
+          r.appendChild(status);
+          var meta = [row.centre, row.who].filter(Boolean).join(' · ');
+          r.appendChild(el('div', 'sats-meta', meta));
+          root.appendChild(r);
+        });
+      }
+
+      function load() {
+        var s = Homey.getSettings() || {};
+        var member = s.member && typeof s.member === 'object' ? s.member.id : (s.member || 'all');
+        var awayKm = typeof s.away_km === 'number' ? s.away_km : 10;
+        Homey.api('GET', '/classes?member=' + encodeURIComponent(member || 'all') + '&awayKm=' + awayKm)
+          .then(render)
+          .catch(function () {
+            root.textContent = '';
+            root.appendChild(el('div', 'sats-empty', t('widget.error', 'Could not load classes')));
+          })
+          .then(function () {
+            if (!ready) { ready = true; Homey.ready(); }
+          });
+      }
+
+      // The app emits this whenever a member's bookings change.
+      if (typeof Homey.on === 'function') Homey.on('bookings_changed', load);
+      // Fallback, and to move past classes off the list as time passes.
+      setInterval(load, 5 * 60 * 1000);
+      load();
+    }
+  </script>
+</body>
+</html>

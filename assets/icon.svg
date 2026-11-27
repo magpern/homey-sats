@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960">
+  <!-- Generic icon: a dumbbell with a clock. Not the SATS logo. -->
+  <g fill="none" stroke="#000" stroke-width="48" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="640" cy="640" r="220"/>
+    <path d="M640 520v130l80 60"/>
+    <path d="M140 300h420"/>
+    <rect x="100" y="180" width="80" height="240" rx="24"/>
+    <rect x="520" y="180" width="80" height="240" rx="24"/>
+    <path d="M60 240v120M640 240v120"/>
+  </g>
+</svg>

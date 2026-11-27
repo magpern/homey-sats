@@ -1,0 +1,10 @@
+{
+  "title": {
+    "en": "Refresh bookings now",
+    "sv": "Uppdatera bokningar nu"
+  },
+  "hint": {
+    "en": "Fetches the booked SATS classes of all members right away instead of waiting for the next scheduled poll.",
+    "sv": "Hämtar alla medlemmars bokade SATS-pass direkt i stället för att vänta på nästa schemalagda hämtning."
+  }
+}

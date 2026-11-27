@@ -1,0 +1,42 @@
+{
+  "pair": {
+    "device_name": "SATS-medlem",
+    "invalid_credentials": "SATS godkände inte medlemsnummer/e-post och lösenord. Kontrollera dem i SATS-appen och försök igen.",
+    "rate_limited": "SATS nekar inloggningar tillfälligt (för många försök). Vänta några minuter och försök igen.",
+    "unreachable": "Kunde inte nå SATS. Kontrollera Homeys internetanslutning och försök igen.",
+    "failed": "Inloggningen misslyckades: __message__",
+    "not_logged_in": "Logga in först.",
+    "other_member": "Inloggningen tillhör en annan SATS-medlem än den här enheten. Lägg till den som en ny enhet i stället."
+  },
+  "device": {
+    "session_expired": "SATS-sessionen har gått ut. Öppna enheten, välj Reparera och logga in igen.",
+    "no_class": "Inget bokat pass",
+    "no_waitlist_class": "Inte i kö till något pass"
+  },
+  "errors": {
+    "no_members": "Inga SATS-medlemmar är tillagda än. Lägg till en SATS-medlem först."
+  },
+  "timeline": {
+    "promoted": "__member__: flyttad från väntelistan till bokad på __class__ (__when__)",
+    "position": "__member__: köplats för __class__ (__when__) nu #__new__ (var #__old__)",
+    "instructor": "__member__: __class__ (__when__) har nu instruktör __new__ (var __old__)",
+    "cancelled": "__member__: __class__ (__when__) ställdes in"
+  },
+  "widget": {
+    "all_members": "Alla medlemmar",
+    "today": "Idag",
+    "tomorrow": "Imorgon",
+    "booked": "Bokad",
+    "waitlist": "Väntelista",
+    "cancelled": "Inställt",
+    "away": "Borta",
+    "empty": "Inga bokade pass de närmaste 7 dagarna",
+    "error": "Kunde inte hämta passen"
+  },
+  "settings": {
+    "title": "SATS (inofficiell)",
+    "subtitle": "Medlemmar läggs till som enheter. Här finns bara inställningar för hela appen.",
+    "timeline": "Visa ändringar i väntelistan, byte av instruktör och inställda pass i Homeys tidslinje",
+    "timelineHint": "Flyttad från väntelistan till bokad, ändrad köplats, bytt instruktör och inställt pass."
+  }
+}

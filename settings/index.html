@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+</head>
+<body>
+  <header class="homey-header">
+    <h1 class="homey-title" data-i18n="settings.title"></h1>
+    <p class="homey-subtitle" data-i18n="settings.subtitle"></p>
+  </header>
+
+  <fieldset class="homey-form-fieldset">
+    <label class="homey-form-checkbox">
+      <input class="homey-form-checkbox-input" id="timeline" type="checkbox" />
+      <span class="homey-form-checkbox-checkmark"></span>
+      <span class="homey-form-checkbox-text" data-i18n="settings.timeline"></span>
+    </label>
+    <p class="homey-form-hint" data-i18n="settings.timelineHint"></p>
+  </fieldset>
+
+  <script type="text/javascript">
+    function onHomeyReady(Homey) {
+      var box = document.getElementById('timeline');
+      Homey.get('timeline_notifications', function (err, value) {
+        box.checked = err ? true : value !== false; // default on
+        Homey.ready();
+      });
+      box.addEventListener('change', function () {
+        Homey.set('timeline_notifications', box.checked, function (err) {
+          if (err) Homey.alert(err.message || String(err));
+        });
+      });
+    }
+  </script>
+</body>
+</html>

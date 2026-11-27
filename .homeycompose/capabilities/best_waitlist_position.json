@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Best waiting-list position",
+    "sv": "Bästa köplats"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icon.svg",
+  "decimals": 0,
+  "min": 0,
+  "insights": true
+}

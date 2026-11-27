@@ -1,0 +1,203 @@
+{
+  "name": {
+    "en": "SATS member",
+    "sv": "SATS-medlem"
+  },
+  "class": "other",
+  "capabilities": [
+    "next_class",
+    "next_waitlist_class",
+    "booked_count",
+    "waitlist_count",
+    "best_waitlist_position"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "cloud"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Log in to SATS",
+          "sv": "Logga in på SATS"
+        },
+        "usernameLabel": {
+          "en": "SATS member id or e-mail",
+          "sv": "SATS medlemsnummer eller e-post"
+        },
+        "usernamePlaceholder": {
+          "en": "member id or name@example.com",
+          "sv": "medlemsnummer eller namn@example.com"
+        },
+        "passwordLabel": {
+          "en": "SATS password",
+          "sv": "SATS-lösenord"
+        },
+        "passwordPlaceholder": {
+          "en": "Password",
+          "sv": "Lösenord"
+        }
+      }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "repair": [
+    {
+      "id": "login_credentials",
+      "template": "login_credentials",
+      "options": {
+        "title": {
+          "en": "Log in to SATS again",
+          "sv": "Logga in på SATS igen"
+        },
+        "usernameLabel": {
+          "en": "SATS member id or e-mail",
+          "sv": "SATS medlemsnummer eller e-post"
+        },
+        "usernamePlaceholder": {
+          "en": "member id or name@example.com",
+          "sv": "medlemsnummer eller namn@example.com"
+        },
+        "passwordLabel": {
+          "en": "SATS password",
+          "sv": "SATS-lösenord"
+        },
+        "passwordPlaceholder": {
+          "en": "Password",
+          "sv": "Lösenord"
+        }
+      }
+    }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "SATS",
+        "sv": "SATS"
+      },
+      "children": [
+        {
+          "id": "market",
+          "type": "dropdown",
+          "value": "se",
+          "label": {
+            "en": "Country",
+            "sv": "Land"
+          },
+          "values": [
+            {
+              "id": "se",
+              "label": {
+                "en": "Sweden",
+                "sv": "Sverige"
+              }
+            },
+            {
+              "id": "no",
+              "label": {
+                "en": "Norway",
+                "sv": "Norge"
+              }
+            },
+            {
+              "id": "dk",
+              "label": {
+                "en": "Denmark",
+                "sv": "Danmark"
+              }
+            },
+            {
+              "id": "fi",
+              "label": {
+                "en": "Finland",
+                "sv": "Finland"
+              }
+            }
+          ]
+        },
+        {
+          "id": "home_centres",
+          "type": "textarea",
+          "value": "",
+          "label": {
+            "en": "Home centres",
+            "sv": "Hemmacenter"
+          },
+          "hint": {
+            "en": "One centre per line (or comma separated), written as in the list below. Used by the condition \"class is at one of my home centres\".",
+            "sv": "Ett center per rad (eller kommaseparerat), skrivet som i listan nedan. Används av villkoret \"passet är på ett av mina hemmacenter\"."
+          }
+        },
+        {
+          "id": "known_centres",
+          "type": "label",
+          "value": "",
+          "label": {
+            "en": "Centres in your bookings",
+            "sv": "Center i dina bokningar"
+          },
+          "hint": {
+            "en": "Filled in automatically from your bookings. Copy names from here into Home centres.",
+            "sv": "Fylls i automatiskt från dina bokningar. Kopiera namn härifrån till Hemmacenter."
+          }
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Advanced",
+        "sv": "Avancerat"
+      },
+      "children": [
+        {
+          "id": "geocoding",
+          "type": "checkbox",
+          "value": true,
+          "label": {
+            "en": "Look up centre locations with OpenStreetMap",
+            "sv": "Slå upp centrens platser med OpenStreetMap"
+          },
+          "hint": {
+            "en": "Used only when SATS gives no coordinates for a centre. Sends the centre's name/address (never your home location) to nominatim.openstreetmap.org.",
+            "sv": "Används bara när SATS inte anger koordinater för ett center. Skickar centrets namn/adress (aldrig din hemadress) till nominatim.openstreetmap.org."
+          }
+        },
+        {
+          "id": "path_segment",
+          "type": "text",
+          "value": "",
+          "label": {
+            "en": "API path segment",
+            "sv": "API-sökvägssegment"
+          },
+          "hint": {
+            "en": "Leave empty: the app uses the member id from your SATS login. Only for troubleshooting if SATS changes its API (see docs/sats-api.md).",
+            "sv": "Lämna tomt: appen använder medlems-id:t från din SATS-inloggning. Bara för felsökning om SATS ändrar sitt API (se docs/sats-api.md)."
+          }
+        }
+      ]
+    }
+  ]
+}

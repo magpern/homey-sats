@@ -1,0 +1,42 @@
+{
+  "pair": {
+    "device_name": "SATS member",
+    "invalid_credentials": "SATS did not accept this member id/e-mail and password. Check them in the SATS app and try again.",
+    "rate_limited": "SATS is temporarily refusing logins (too many attempts). Wait a few minutes and try again.",
+    "unreachable": "Could not reach SATS. Check Homey's internet connection and try again.",
+    "failed": "Login failed: __message__",
+    "not_logged_in": "Log in first.",
+    "other_member": "That login belongs to a different SATS member than this device. Add it as a new device instead."
+  },
+  "device": {
+    "session_expired": "SATS session expired. Open the device, choose Repair and log in again.",
+    "no_class": "No booked class",
+    "no_waitlist_class": "Not on a waiting list"
+  },
+  "errors": {
+    "no_members": "No SATS members are paired yet. Add a SATS member device first."
+  },
+  "timeline": {
+    "promoted": "__member__: moved from the waiting list to booked for __class__ (__when__)",
+    "position": "__member__: waiting list for __class__ (__when__) now #__new__ (was #__old__)",
+    "cancelled": "__member__: __class__ (__when__) was cancelled",
+    "instructor": "__member__: __class__ (__when__) now has instructor __new__ (was __old__)"
+  },
+  "widget": {
+    "all_members": "All members",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "booked": "Booked",
+    "waitlist": "Waiting list",
+    "cancelled": "Cancelled",
+    "away": "Away",
+    "empty": "No booked classes in the next 7 days",
+    "error": "Could not load classes"
+  },
+  "settings": {
+    "title": "SATS (unofficial)",
+    "subtitle": "Members are added as devices. This page only has app-wide options.",
+    "timeline": "Post waiting-list changes, instructor changes and cancellations to the Homey timeline",
+    "timelineHint": "Moved from the waiting list to booked, waiting-list position changed, instructor changed, and class cancelled."
+  }
+}

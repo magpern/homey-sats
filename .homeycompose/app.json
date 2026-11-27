@@ -1,0 +1,34 @@
+{
+  "id": "com.github.magpern.sats",
+  "version": "1.0.0",
+  "compatibility": ">=12.3.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "SATS (unofficial)",
+    "sv": "SATS (inofficiell)"
+  },
+  "description": {
+    "en": "Let your home react to your booked SATS classes. Unofficial, not affiliated with SATS.",
+    "sv": "Låt hemmet reagera på dina bokade SATS-pass. Inofficiell, inte kopplad till SATS."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:geolocation"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "homey-sats contributors"
+  },
+  "support": "https://github.com/magpern/homey-sats/issues",
+  "brandColor": "#0B1F4B",
+  "source": "https://github.com/magpern/homey-sats"
+}
