@@ -1,6 +1,6 @@
 {
   "name": "com.github.magpern.sats",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial Homey app: booked SATS classes as Homey Flow triggers",
   "main": "app.js",
   "private": true,

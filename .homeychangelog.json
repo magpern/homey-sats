@@ -2,5 +2,9 @@
   "1.0.0": {
     "en": "First test release: booked classes, waiting list, instructor changes and Flow cards.",
     "sv": "Första testversionen: bokade pass, väntelista, byte av instruktör och flödeskort."
+  },
+  "1.0.1": {
+    "en": "New App Store description with home automation examples.",
+    "sv": "Ny beskrivning i App Store med exempel på hemautomation."
   }
 }
