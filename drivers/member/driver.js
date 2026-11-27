@@ -29,10 +29,23 @@ class MemberDriver extends Homey.Driver {
 
   /** Distinct "starts in N minutes" values used in Flows for this device. */
   async getStartOffsets(device) {
-    if (!this._startArgs) this._startArgs = await this.startsCard.getArgumentValues();
+    if (!this._startArgs) {
+      try {
+        this._startArgs = (await this.startsCard.getArgumentValues()) || [];
+      } catch (err) {
+        // No Flows using the card yet (or not supported here): nothing to schedule.
+        if (!this._offsetErrorLogged) this.error(`Could not read "starts in" Flow arguments: ${err.message}`);
+        this._offsetErrorLogged = true;
+        return [];
+      }
+    }
     const id = device.getData().id;
+    const isThisDevice = (d) => Boolean(d) && (d === device
+      || (typeof d.getData === 'function' && d.getData().id === id)
+      || (d.data && d.data.id === id)
+      || d.id === id);
     return [...new Set(this._startArgs
-      .filter((a) => a.device && a.device.getData && a.device.getData().id === id)
+      .filter((a) => a && isThisDevice(a.device))
       .map((a) => Number(a.minutes))
       .filter((n) => Number.isFinite(n) && n >= 0))];
   }

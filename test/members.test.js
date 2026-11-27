@@ -234,3 +234,28 @@ test('logs and status never contain tokens, class names, centres or response dat
     assert.ok(!all.includes(secret), `"${secret}" leaked into logs/status`);
   }
 });
+
+test('endpoint not found runs diagnostics once and logs no personal data', async () => {
+  const clock = at('2026-11-30T05:00:00+01:00');
+  const a = makeMember({
+    fixture: null,
+    clock,
+    handler: (call) => {
+      if (call.url === TOKEN_URL) return { status: 200, body: tokenResponse() };
+      if (call.url.endsWith('/profile')) return { status: 200, body: { firstName: 'Invented Person' } };
+      return { status: 404, body: {} };
+    },
+  });
+  await assert.rejects(a.service.refresh(), /No upcoming-workouts endpoint/);
+  const diagLines = a.logs.filter((l) => l.startsWith('Diagnostics:'));
+  assert.ok(diagLines.some((l) => l.includes('GET /profile -> 200 keys {firstName}')));
+  assert.ok(diagLines.some((l) => l.includes('/v2/<exerpMemberId>/upcoming-workouts -> 404')));
+  const all = a.logs.join('\n');
+  for (const secret of ['Invented Person', '999999', 'user-0000-test', 'fake-refresh', 'eyJ']) {
+    assert.ok(!all.includes(secret), `"${secret}" leaked`);
+  }
+  const before = a.transport.calls.length;
+  await assert.rejects(a.service.refresh());
+  const apiCalls = a.transport.calls.slice(before).filter((c) => c.url !== TOKEN_URL).length;
+  assert.ok(apiCalls <= 9, `second failure does not re-run diagnostics (${apiCalls} API calls)`);
+});

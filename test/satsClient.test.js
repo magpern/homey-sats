@@ -198,3 +198,38 @@ test('429 is reported as rate limiting', async () => {
   const client = makeClient(transport);
   await assert.rejects(client.login(TEST_USERNAME, TEST_PASSWORD), { code: 'RATE_LIMIT' });
 });
+
+test('shapeOf lists key names only and masks id-like keys', () => {
+  const { shapeOf } = require('../lib/SatsClient');
+  const shape = shapeOf({
+    firstName: 'Invented Person',
+    email: 'someone@example.com',
+    items: [{ id: 1, name: 'Strength 45', startTime: '2026-11-30T06:30:00Z' }],
+    byDate: { '2026-11-30': { count: 2 }, 'someone@example.com': 1 },
+  });
+  assert.equal(shape, '{firstName,email,items:[1]{id,name,startTime},byDate:{<key>:{count},<key>}}');
+  for (const secret of ['Invented Person', 'someone@example.com', 'Strength 45', '2026-11-30']) {
+    assert.ok(!shape.includes(secret));
+  }
+});
+
+test('diagnostics report status codes and shapes, masking member ids from the token', async () => {
+  const transport = fakeTransport((call) => {
+    if (call.url === TOKEN_URL) return { status: 200, body: tokenResponse() };
+    if (call.url.endsWith('/profile')) return { status: 200, body: { firstName: 'Invented Person', market: 'se' } };
+    if (call.url.endsWith('/v2/999999/upcoming-workouts')) return { status: 200, body: { upcoming: [{ name: 'Strength 45' }] } };
+    return { status: 404, body: { message: 'Not found' } };
+  });
+  const client = makeClient(transport, { refreshToken: 'r0' });
+  const report = await client.diagnose();
+  const text = JSON.stringify(report);
+  assert.ok(report.claimNames.includes('exerpMemberId'));
+  assert.ok(!text.includes('999999'), 'member id from the token is masked');
+  assert.ok(!text.includes('user-0000-test'), 'sub is masked');
+  assert.ok(!text.includes('Invented Person') && !text.includes('Strength 45'), 'no values');
+  const byPath = Object.fromEntries(report.requests.map((r) => [r.path, r]));
+  assert.equal(byPath['/v2/<exerpMemberId>/upcoming-workouts'].status, 200);
+  assert.equal(byPath['/v2/<exerpMemberId>/upcoming-workouts'].shape, '{upcoming:[1]{name}}');
+  assert.equal(byPath['/profile'].shape, '{firstName,market}');
+  assert.equal(byPath['/v2/se/upcoming-workouts'].status, 404);
+});
