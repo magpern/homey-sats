@@ -1,0 +1,695 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.github.homeysats",
+  "version": "1.0.0",
+  "compatibility": ">=8.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "SATS (unofficial)",
+    "sv": "SATS (inofficiell)"
+  },
+  "description": {
+    "en": "Let your home react to your booked SATS classes. Unofficial, not affiliated with SATS.",
+    "sv": "Låt hemmet reagera på dina bokade SATS-pass. Inofficiell, inte kopplad till SATS."
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:geolocation"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "homey-sats contributors"
+  },
+  "support": "https://github.com/magpern/homey-sats/issues",
+  "brandColor": "#0B1F4B",
+  "source": "https://github.com/magpern/homey-sats",
+  "flow": {
+    "conditions": [
+      {
+        "title": {
+          "en": "Any member !{{has|doesn't have}} a booked class before … today/tomorrow",
+          "sv": "Någon medlem !{{har|har inte}} ett bokat pass före … idag/imorgon"
+        },
+        "titleFormatted": {
+          "en": "Any member !{{has|doesn't have}} a booked class before [[time]] [[day]]",
+          "sv": "Någon medlem !{{har|har inte}} ett bokat pass före [[time]] [[day]]"
+        },
+        "args": [
+          {
+            "type": "time",
+            "name": "time",
+            "title": {
+              "en": "Time",
+              "sv": "Tid"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "day",
+            "title": {
+              "en": "Day",
+              "sv": "Dag"
+            },
+            "values": [
+              {
+                "id": "today",
+                "label": {
+                  "en": "today",
+                  "sv": "idag"
+                }
+              },
+              {
+                "id": "tomorrow",
+                "label": {
+                  "en": "tomorrow",
+                  "sv": "imorgon"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "any_member_class_before"
+      },
+      {
+        "id": "class_within_km",
+        "title": {
+          "en": "Class !{{is|is not}} within … km of home",
+          "sv": "Passet !{{är|är inte}} inom … km hemifrån"
+        },
+        "titleFormatted": {
+          "en": "Class !{{is|is not}} within [[km]] km of home",
+          "sv": "Passet !{{är|är inte}} inom [[km]] km hemifrån"
+        },
+        "hint": {
+          "en": "Checks the class that triggered this Flow (or else the member's next class) against Homey's location. False if the centre's location is unknown.",
+          "sv": "Kontrollerar passet som startade detta flöde (annars medlemmens nästa pass) mot Homeys plats. Falskt om centrets plats är okänd."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          },
+          {
+            "type": "number",
+            "name": "km",
+            "title": {
+              "en": "Kilometres",
+              "sv": "Kilometer"
+            },
+            "placeholder": {
+              "en": "10",
+              "sv": "10"
+            },
+            "min": 0,
+            "max": 20000,
+            "step": 0.1
+          }
+        ]
+      },
+      {
+        "id": "class_at_home_centre",
+        "title": {
+          "en": "Class !{{is|is not}} at one of my home centres",
+          "sv": "Passet !{{är|är inte}} på ett av mina hemmacenter"
+        },
+        "hint": {
+          "en": "Checks the class that triggered this Flow (or else the member's next class) against the Home centres in the device settings.",
+          "sv": "Kontrollerar passet som startade detta flöde (annars medlemmens nästa pass) mot Hemmacenter i enhetens inställningar."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "title": {
+          "en": "Refresh bookings now",
+          "sv": "Uppdatera bokningar nu"
+        },
+        "hint": {
+          "en": "Fetches the booked SATS classes of all members right away instead of waiting for the next scheduled poll.",
+          "sv": "Hämtar alla medlemmars bokade SATS-pass direkt i stället för att vänta på nästa schemalagda hämtning."
+        },
+        "id": "refresh_bookings"
+      }
+    ],
+    "triggers": [
+      {
+        "id": "class_starts_in",
+        "title": {
+          "en": "A booked class starts in … minutes",
+          "sv": "Ett bokat pass börjar om … minuter"
+        },
+        "titleFormatted": {
+          "en": "A booked class starts in [[minutes]] minutes",
+          "sv": "Ett bokat pass börjar om [[minutes]] minuter"
+        },
+        "hint": {
+          "en": "Fires once per booked class, the given number of minutes before it starts. Waiting-list places do not count.",
+          "sv": "Körs en gång per bokat pass, angivet antal minuter innan det börjar. Platser på väntelistan räknas inte."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          },
+          {
+            "type": "number",
+            "name": "minutes",
+            "title": {
+              "en": "Minutes",
+              "sv": "Minuter"
+            },
+            "placeholder": {
+              "en": "60",
+              "sv": "60"
+            },
+            "min": 0,
+            "max": 1440,
+            "step": 1
+          }
+        ],
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "end",
+            "title": {
+              "en": "End time",
+              "sv": "Sluttid"
+            },
+            "example": {
+              "en": "07:15",
+              "sv": "07:15"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "string",
+            "name": "city",
+            "title": {
+              "en": "City",
+              "sv": "Stad"
+            },
+            "example": {
+              "en": "Stockholm",
+              "sv": "Stockholm"
+            }
+          },
+          {
+            "type": "string",
+            "name": "country",
+            "title": {
+              "en": "Country",
+              "sv": "Land"
+            },
+            "example": {
+              "en": "Sweden",
+              "sv": "Sverige"
+            }
+          },
+          {
+            "type": "number",
+            "name": "distance_km",
+            "title": {
+              "en": "Distance from home (km, -1 if unknown)",
+              "sv": "Avstånd hemifrån (km, -1 om okänt)"
+            },
+            "example": 3.2
+          }
+        ]
+      },
+      {
+        "id": "class_ends",
+        "title": {
+          "en": "A booked class ends",
+          "sv": "Ett bokat pass slutar"
+        },
+        "hint": {
+          "en": "Fires when a booked class ends. Needs an end time or duration from SATS.",
+          "sv": "Körs när ett bokat pass slutar. Kräver sluttid eller längd från SATS."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "end",
+            "title": {
+              "en": "End time",
+              "sv": "Sluttid"
+            },
+            "example": {
+              "en": "07:15",
+              "sv": "07:15"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "string",
+            "name": "city",
+            "title": {
+              "en": "City",
+              "sv": "Stad"
+            },
+            "example": {
+              "en": "Stockholm",
+              "sv": "Stockholm"
+            }
+          },
+          {
+            "type": "string",
+            "name": "country",
+            "title": {
+              "en": "Country",
+              "sv": "Land"
+            },
+            "example": {
+              "en": "Sweden",
+              "sv": "Sverige"
+            }
+          },
+          {
+            "type": "number",
+            "name": "distance_km",
+            "title": {
+              "en": "Distance from home (km, -1 if unknown)",
+              "sv": "Avstånd hemifrån (km, -1 om okänt)"
+            },
+            "example": 3.2
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
+      },
+      {
+        "id": "class_cancelled",
+        "title": {
+          "en": "A booked class was cancelled",
+          "sv": "Ett bokat pass ställdes in"
+        },
+        "hint": {
+          "en": "Fires when an upcoming booked class is cancelled or disappears from your bookings, whether you or SATS cancelled it. Detected at the next refresh.",
+          "sv": "Körs när ett kommande bokat pass ställs in eller försvinner från dina bokningar, oavsett om du eller SATS avbokade. Upptäcks vid nästa uppdatering."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "end",
+            "title": {
+              "en": "End time",
+              "sv": "Sluttid"
+            },
+            "example": {
+              "en": "07:15",
+              "sv": "07:15"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "string",
+            "name": "city",
+            "title": {
+              "en": "City",
+              "sv": "Stad"
+            },
+            "example": {
+              "en": "Stockholm",
+              "sv": "Stockholm"
+            }
+          },
+          {
+            "type": "string",
+            "name": "country",
+            "title": {
+              "en": "Country",
+              "sv": "Land"
+            },
+            "example": {
+              "en": "Sweden",
+              "sv": "Sverige"
+            }
+          },
+          {
+            "type": "number",
+            "name": "distance_km",
+            "title": {
+              "en": "Distance from home (km, -1 if unknown)",
+              "sv": "Avstånd hemifrån (km, -1 om okänt)"
+            },
+            "example": 3.2
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "SATS member",
+        "sv": "SATS-medlem"
+      },
+      "class": "other",
+      "capabilities": [
+        "sats_next_class"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "cloud"
+      ],
+      "images": {
+        "small": "/drivers/member/assets/images/small.png",
+        "large": "/drivers/member/assets/images/large.png",
+        "xlarge": "/drivers/member/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "login_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Log in to SATS",
+              "sv": "Logga in på SATS"
+            },
+            "usernameLabel": {
+              "en": "SATS member id or e-mail",
+              "sv": "SATS medlemsnummer eller e-post"
+            },
+            "usernamePlaceholder": {
+              "en": "member id or name@example.com",
+              "sv": "medlemsnummer eller namn@example.com"
+            },
+            "passwordLabel": {
+              "en": "SATS password",
+              "sv": "SATS-lösenord"
+            },
+            "passwordPlaceholder": {
+              "en": "Password",
+              "sv": "Lösenord"
+            }
+          },
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "repair": [
+        {
+          "id": "login_credentials",
+          "template": "login_credentials",
+          "options": {
+            "title": {
+              "en": "Log in to SATS again",
+              "sv": "Logga in på SATS igen"
+            },
+            "usernameLabel": {
+              "en": "SATS member id or e-mail",
+              "sv": "SATS medlemsnummer eller e-post"
+            },
+            "usernamePlaceholder": {
+              "en": "member id or name@example.com",
+              "sv": "medlemsnummer eller namn@example.com"
+            },
+            "passwordLabel": {
+              "en": "SATS password",
+              "sv": "SATS-lösenord"
+            },
+            "passwordPlaceholder": {
+              "en": "Password",
+              "sv": "Lösenord"
+            }
+          }
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "SATS",
+            "sv": "SATS"
+          },
+          "children": [
+            {
+              "id": "market",
+              "type": "dropdown",
+              "value": "se",
+              "label": {
+                "en": "Country",
+                "sv": "Land"
+              },
+              "values": [
+                {
+                  "id": "se",
+                  "label": {
+                    "en": "Sweden",
+                    "sv": "Sverige"
+                  }
+                },
+                {
+                  "id": "no",
+                  "label": {
+                    "en": "Norway",
+                    "sv": "Norge"
+                  }
+                },
+                {
+                  "id": "dk",
+                  "label": {
+                    "en": "Denmark",
+                    "sv": "Danmark"
+                  }
+                },
+                {
+                  "id": "fi",
+                  "label": {
+                    "en": "Finland",
+                    "sv": "Finland"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "home_centres",
+              "type": "textarea",
+              "value": "",
+              "label": {
+                "en": "Home centres",
+                "sv": "Hemmacenter"
+              },
+              "hint": {
+                "en": "One centre per line (or comma separated), written as in the list below. Used by the condition \"class is at one of my home centres\".",
+                "sv": "Ett center per rad (eller kommaseparerat), skrivet som i listan nedan. Används av villkoret \"passet är på ett av mina hemmacenter\"."
+              }
+            },
+            {
+              "id": "known_centres",
+              "type": "label",
+              "value": "",
+              "label": {
+                "en": "Centres in your bookings",
+                "sv": "Center i dina bokningar"
+              },
+              "hint": {
+                "en": "Filled in automatically from your bookings. Copy names from here into Home centres.",
+                "sv": "Fylls i automatiskt från dina bokningar. Kopiera namn härifrån till Hemmacenter."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Advanced",
+            "sv": "Avancerat"
+          },
+          "children": [
+            {
+              "id": "geocoding",
+              "type": "checkbox",
+              "value": true,
+              "label": {
+                "en": "Look up centre locations with OpenStreetMap",
+                "sv": "Slå upp centrens platser med OpenStreetMap"
+              },
+              "hint": {
+                "en": "Used only when SATS gives no coordinates for a centre. Sends the centre's name/address (never your home location) to nominatim.openstreetmap.org.",
+                "sv": "Används bara när SATS inte anger koordinater för ett center. Skickar centrets namn/adress (aldrig din hemadress) till nominatim.openstreetmap.org."
+              }
+            },
+            {
+              "id": "path_segment",
+              "type": "text",
+              "value": "",
+              "label": {
+                "en": "API path segment",
+                "sv": "API-sökvägssegment"
+              },
+              "hint": {
+                "en": "Leave empty. Only set this if the device reports that the bookings endpoint was not found (see docs/sats-api.md).",
+                "sv": "Lämna tomt. Ange bara om enheten rapporterar att bokningsadressen inte hittades (se docs/sats-api.md)."
+              }
+            }
+          ]
+        }
+      ],
+      "id": "member"
+    }
+  ],
+  "capabilities": {
+    "sats_next_class": {
+      "type": "string",
+      "title": {
+        "en": "Next class",
+        "sv": "Nästa pass"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icon.svg",
+      "insights": false
+    }
+  }
+}

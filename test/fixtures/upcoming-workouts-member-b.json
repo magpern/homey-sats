@@ -1,0 +1,21 @@
+{
+  "_comment": "INVENTED test data for 'member B', not a real member's bookings. One class is in Oslo and has no coordinates, so the geocoder has to look it up.",
+  "upcomingWorkouts": [
+    {
+      "type": "upcoming-group-exercise",
+      "id": "gx-5001",
+      "name": "Core 30",
+      "startTime": "2026-11-30T12:00:00+01:00",
+      "endTime": "2026-11-30T12:30:00+01:00",
+      "club": { "id": "c-1", "name": "Example Centre North", "city": "Stockholm", "country": "Sweden", "latitude": 59.3420, "longitude": 18.0490 }
+    },
+    {
+      "type": "upcoming-group-exercise",
+      "id": "gx-5002",
+      "name": "Spinning 45",
+      "startTime": "2026-12-01T07:00:00+01:00",
+      "endTime": "2026-12-01T07:45:00+01:00",
+      "club": { "id": "c-9", "name": "Example Centre Oslo", "city": "Oslo", "country": "Norway" }
+    }
+  ]
+}

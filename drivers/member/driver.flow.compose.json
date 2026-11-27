@@ -1,0 +1,352 @@
+{
+  "triggers": [
+    {
+      "id": "class_starts_in",
+      "title": {
+        "en": "A booked class starts in … minutes",
+        "sv": "Ett bokat pass börjar om … minuter"
+      },
+      "titleFormatted": {
+        "en": "A booked class starts in [[minutes]] minutes",
+        "sv": "Ett bokat pass börjar om [[minutes]] minuter"
+      },
+      "hint": {
+        "en": "Fires once per booked class, the given number of minutes before it starts. Waiting-list places do not count.",
+        "sv": "Körs en gång per bokat pass, angivet antal minuter innan det börjar. Platser på väntelistan räknas inte."
+      },
+      "args": [
+        {
+          "type": "number",
+          "name": "minutes",
+          "title": {
+            "en": "Minutes",
+            "sv": "Minuter"
+          },
+          "placeholder": {
+            "en": "60",
+            "sv": "60"
+          },
+          "min": 0,
+          "max": 1440,
+          "step": 1
+        }
+      ],
+      "tokens": [
+        {
+          "type": "string",
+          "name": "class_name",
+          "title": {
+            "en": "Class name",
+            "sv": "Passnamn"
+          },
+          "example": {
+            "en": "Strength 45",
+            "sv": "Strength 45"
+          }
+        },
+        {
+          "type": "string",
+          "name": "start",
+          "title": {
+            "en": "Start time",
+            "sv": "Starttid"
+          },
+          "example": {
+            "en": "06:30",
+            "sv": "06:30"
+          }
+        },
+        {
+          "type": "string",
+          "name": "end",
+          "title": {
+            "en": "End time",
+            "sv": "Sluttid"
+          },
+          "example": {
+            "en": "07:15",
+            "sv": "07:15"
+          }
+        },
+        {
+          "type": "string",
+          "name": "centre",
+          "title": {
+            "en": "Centre",
+            "sv": "Center"
+          },
+          "example": {
+            "en": "Example Centre",
+            "sv": "Exempelcentret"
+          }
+        },
+        {
+          "type": "string",
+          "name": "city",
+          "title": {
+            "en": "City",
+            "sv": "Stad"
+          },
+          "example": {
+            "en": "Stockholm",
+            "sv": "Stockholm"
+          }
+        },
+        {
+          "type": "string",
+          "name": "country",
+          "title": {
+            "en": "Country",
+            "sv": "Land"
+          },
+          "example": {
+            "en": "Sweden",
+            "sv": "Sverige"
+          }
+        },
+        {
+          "type": "number",
+          "name": "distance_km",
+          "title": {
+            "en": "Distance from home (km, -1 if unknown)",
+            "sv": "Avstånd hemifrån (km, -1 om okänt)"
+          },
+          "example": 3.2
+        }
+      ]
+    },
+    {
+      "id": "class_ends",
+      "title": {
+        "en": "A booked class ends",
+        "sv": "Ett bokat pass slutar"
+      },
+      "hint": {
+        "en": "Fires when a booked class ends. Needs an end time or duration from SATS.",
+        "sv": "Körs när ett bokat pass slutar. Kräver sluttid eller längd från SATS."
+      },
+      "tokens": [
+        {
+          "type": "string",
+          "name": "class_name",
+          "title": {
+            "en": "Class name",
+            "sv": "Passnamn"
+          },
+          "example": {
+            "en": "Strength 45",
+            "sv": "Strength 45"
+          }
+        },
+        {
+          "type": "string",
+          "name": "start",
+          "title": {
+            "en": "Start time",
+            "sv": "Starttid"
+          },
+          "example": {
+            "en": "06:30",
+            "sv": "06:30"
+          }
+        },
+        {
+          "type": "string",
+          "name": "end",
+          "title": {
+            "en": "End time",
+            "sv": "Sluttid"
+          },
+          "example": {
+            "en": "07:15",
+            "sv": "07:15"
+          }
+        },
+        {
+          "type": "string",
+          "name": "centre",
+          "title": {
+            "en": "Centre",
+            "sv": "Center"
+          },
+          "example": {
+            "en": "Example Centre",
+            "sv": "Exempelcentret"
+          }
+        },
+        {
+          "type": "string",
+          "name": "city",
+          "title": {
+            "en": "City",
+            "sv": "Stad"
+          },
+          "example": {
+            "en": "Stockholm",
+            "sv": "Stockholm"
+          }
+        },
+        {
+          "type": "string",
+          "name": "country",
+          "title": {
+            "en": "Country",
+            "sv": "Land"
+          },
+          "example": {
+            "en": "Sweden",
+            "sv": "Sverige"
+          }
+        },
+        {
+          "type": "number",
+          "name": "distance_km",
+          "title": {
+            "en": "Distance from home (km, -1 if unknown)",
+            "sv": "Avstånd hemifrån (km, -1 om okänt)"
+          },
+          "example": 3.2
+        }
+      ]
+    },
+    {
+      "id": "class_cancelled",
+      "title": {
+        "en": "A booked class was cancelled",
+        "sv": "Ett bokat pass ställdes in"
+      },
+      "hint": {
+        "en": "Fires when an upcoming booked class is cancelled or disappears from your bookings, whether you or SATS cancelled it. Detected at the next refresh.",
+        "sv": "Körs när ett kommande bokat pass ställs in eller försvinner från dina bokningar, oavsett om du eller SATS avbokade. Upptäcks vid nästa uppdatering."
+      },
+      "tokens": [
+        {
+          "type": "string",
+          "name": "class_name",
+          "title": {
+            "en": "Class name",
+            "sv": "Passnamn"
+          },
+          "example": {
+            "en": "Strength 45",
+            "sv": "Strength 45"
+          }
+        },
+        {
+          "type": "string",
+          "name": "start",
+          "title": {
+            "en": "Start time",
+            "sv": "Starttid"
+          },
+          "example": {
+            "en": "06:30",
+            "sv": "06:30"
+          }
+        },
+        {
+          "type": "string",
+          "name": "end",
+          "title": {
+            "en": "End time",
+            "sv": "Sluttid"
+          },
+          "example": {
+            "en": "07:15",
+            "sv": "07:15"
+          }
+        },
+        {
+          "type": "string",
+          "name": "centre",
+          "title": {
+            "en": "Centre",
+            "sv": "Center"
+          },
+          "example": {
+            "en": "Example Centre",
+            "sv": "Exempelcentret"
+          }
+        },
+        {
+          "type": "string",
+          "name": "city",
+          "title": {
+            "en": "City",
+            "sv": "Stad"
+          },
+          "example": {
+            "en": "Stockholm",
+            "sv": "Stockholm"
+          }
+        },
+        {
+          "type": "string",
+          "name": "country",
+          "title": {
+            "en": "Country",
+            "sv": "Land"
+          },
+          "example": {
+            "en": "Sweden",
+            "sv": "Sverige"
+          }
+        },
+        {
+          "type": "number",
+          "name": "distance_km",
+          "title": {
+            "en": "Distance from home (km, -1 if unknown)",
+            "sv": "Avstånd hemifrån (km, -1 om okänt)"
+          },
+          "example": 3.2
+        }
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "class_within_km",
+      "title": {
+        "en": "Class !{{is|is not}} within … km of home",
+        "sv": "Passet !{{är|är inte}} inom … km hemifrån"
+      },
+      "titleFormatted": {
+        "en": "Class !{{is|is not}} within [[km]] km of home",
+        "sv": "Passet !{{är|är inte}} inom [[km]] km hemifrån"
+      },
+      "hint": {
+        "en": "Checks the class that triggered this Flow (or else the member's next class) against Homey's location. False if the centre's location is unknown.",
+        "sv": "Kontrollerar passet som startade detta flöde (annars medlemmens nästa pass) mot Homeys plats. Falskt om centrets plats är okänd."
+      },
+      "args": [
+        {
+          "type": "number",
+          "name": "km",
+          "title": {
+            "en": "Kilometres",
+            "sv": "Kilometer"
+          },
+          "placeholder": {
+            "en": "10",
+            "sv": "10"
+          },
+          "min": 0,
+          "max": 20000,
+          "step": 0.1
+        }
+      ]
+    },
+    {
+      "id": "class_at_home_centre",
+      "title": {
+        "en": "Class !{{is|is not}} at one of my home centres",
+        "sv": "Passet !{{är|är inte}} på ett av mina hemmacenter"
+      },
+      "hint": {
+        "en": "Checks the class that triggered this Flow (or else the member's next class) against the Home centres in the device settings.",
+        "sv": "Kontrollerar passet som startade detta flöde (annars medlemmens nästa pass) mot Hemmacenter i enhetens inställningar."
+      }
+    }
+  ]
+}

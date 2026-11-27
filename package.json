@@ -1,0 +1,15 @@
+{
+  "name": "com.github.homeysats",
+  "version": "1.0.0",
+  "description": "Unofficial Homey app: booked SATS classes as Homey Flow triggers",
+  "main": "app.js",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "validate": "homey app validate"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "MIT"
+}

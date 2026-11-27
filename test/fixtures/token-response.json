@@ -1,0 +1,9 @@
+{
+  "_comment": "INVENTED test data. Shape follows a standard Keycloak token response. The tokens are fake and only the JWT payload is meaningful (see test/helpers.js).",
+  "token_type": "Bearer",
+  "expires_in": 300,
+  "refresh_expires_in": 1800,
+  "scope": "profile email",
+  "access_token": "__FAKE_ACCESS_TOKEN__",
+  "refresh_token": "fake-refresh-token-0001"
+}

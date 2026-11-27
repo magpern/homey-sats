@@ -1,0 +1,18 @@
+{
+  "pair": {
+    "device_name": "SATS member",
+    "invalid_credentials": "SATS did not accept this member id/e-mail and password. Check them in the SATS app and try again.",
+    "rate_limited": "SATS is temporarily refusing logins (too many attempts). Wait a few minutes and try again.",
+    "unreachable": "Could not reach SATS. Check Homey's internet connection and try again.",
+    "failed": "Login failed: __message__",
+    "not_logged_in": "Log in first.",
+    "other_member": "That login belongs to a different SATS member than this device. Add it as a new device instead."
+  },
+  "device": {
+    "session_expired": "SATS session expired. Open the device, choose Repair and log in again.",
+    "no_class": "No booked class"
+  },
+  "errors": {
+    "no_members": "No SATS members are paired yet. Add a SATS member device first."
+  }
+}

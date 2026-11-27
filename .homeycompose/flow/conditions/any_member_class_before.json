@@ -1,0 +1,44 @@
+{
+  "title": {
+    "en": "Any member !{{has|doesn't have}} a booked class before … today/tomorrow",
+    "sv": "Någon medlem !{{har|har inte}} ett bokat pass före … idag/imorgon"
+  },
+  "titleFormatted": {
+    "en": "Any member !{{has|doesn't have}} a booked class before [[time]] [[day]]",
+    "sv": "Någon medlem !{{har|har inte}} ett bokat pass före [[time]] [[day]]"
+  },
+  "args": [
+    {
+      "type": "time",
+      "name": "time",
+      "title": {
+        "en": "Time",
+        "sv": "Tid"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "day",
+      "title": {
+        "en": "Day",
+        "sv": "Dag"
+      },
+      "values": [
+        {
+          "id": "today",
+          "label": {
+            "en": "today",
+            "sv": "idag"
+          }
+        },
+        {
+          "id": "tomorrow",
+          "label": {
+            "en": "tomorrow",
+            "sv": "imorgon"
+          }
+        }
+      ]
+    }
+  ]
+}

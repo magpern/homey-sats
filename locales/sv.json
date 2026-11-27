@@ -1,0 +1,18 @@
+{
+  "pair": {
+    "device_name": "SATS-medlem",
+    "invalid_credentials": "SATS godkände inte medlemsnummer/e-post och lösenord. Kontrollera dem i SATS-appen och försök igen.",
+    "rate_limited": "SATS nekar inloggningar tillfälligt (för många försök). Vänta några minuter och försök igen.",
+    "unreachable": "Kunde inte nå SATS. Kontrollera Homeys internetanslutning och försök igen.",
+    "failed": "Inloggningen misslyckades: __message__",
+    "not_logged_in": "Logga in först.",
+    "other_member": "Inloggningen tillhör en annan SATS-medlem än den här enheten. Lägg till den som en ny enhet i stället."
+  },
+  "device": {
+    "session_expired": "SATS-sessionen har gått ut. Öppna enheten, välj Reparera och logga in igen.",
+    "no_class": "Inget bokat pass"
+  },
+  "errors": {
+    "no_members": "Inga SATS-medlemmar är tillagda än. Lägg till en SATS-medlem först."
+  }
+}
