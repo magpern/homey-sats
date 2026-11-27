@@ -41,8 +41,12 @@ class MemberDriver extends Homey.Driver {
   async _login(username, password) {
     const client = new SatsClient({});
     try {
-      return await client.login(username, password);
+      const account = await client.login(username, password);
+      this.log(`Pairing: SATS login OK (refresh token: ${account.refreshToken ? 'yes' : 'no'}, member key: ${account.memberKey ? 'yes' : 'no'})`);
+      return account;
     } catch (err) {
+      // Safe to log: error code and HTTP status only, never the credentials.
+      this.error(`Pairing: SATS login failed (${err.code || 'error'}${err.status ? `, HTTP ${err.status}` : ''})`);
       if (err instanceof SatsAuthError) throw new Error(this.homey.__('pair.invalid_credentials'));
       if (err.code === 'RATE_LIMIT') throw new Error(this.homey.__('pair.rate_limited'));
       if (err.code === 'NETWORK') throw new Error(this.homey.__('pair.unreachable'));
@@ -52,13 +56,17 @@ class MemberDriver extends Homey.Driver {
 
   async onPair(session) {
     let account = null;
+    this.log('Pairing: started');
 
-    session.setHandler('login', async ({ username, password }) => {
+    session.setHandler('login', async (data) => {
+      const { username, password } = data || {};
+      this.log(`Pairing: login submitted (username: ${username ? 'yes' : 'no'}, password: ${password ? 'yes' : 'no'})`);
       account = await this._login(username, password); // throws a readable error on failure
       return true;
     });
 
     session.setHandler('list_devices', async () => {
+      this.log(`Pairing: list_devices (logged in: ${account ? 'yes' : 'no'})`);
       if (!account) throw new Error(this.homey.__('pair.not_logged_in'));
       return [{
         name: this.homey.__('pair.device_name'),
@@ -69,7 +77,9 @@ class MemberDriver extends Homey.Driver {
   }
 
   async onRepair(session, device) {
-    session.setHandler('login', async ({ username, password }) => {
+    this.log('Repair: started');
+    session.setHandler('login', async (data) => {
+      const { username, password } = data || {};
       const account = await this._login(username, password);
       // Refuse to attach another member's login to this device (only checkable when
       // the device id was derived from the member's identity at pairing time).
