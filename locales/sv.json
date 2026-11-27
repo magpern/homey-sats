@@ -14,5 +14,27 @@
   },
   "errors": {
     "no_members": "Inga SATS-medlemmar är tillagda än. Lägg till en SATS-medlem först."
+  },
+  "timeline": {
+    "promoted": "__member__: flyttad från väntelistan till bokad på __class__ (__when__)",
+    "position": "__member__: köplats för __class__ (__when__) nu #__new__ (var #__old__)",
+    "cancelled": "__member__: __class__ (__when__) ställdes in"
+  },
+  "widget": {
+    "all_members": "Alla medlemmar",
+    "today": "Idag",
+    "tomorrow": "Imorgon",
+    "booked": "Bokad",
+    "waitlist": "Väntelista",
+    "cancelled": "Inställt",
+    "away": "Borta",
+    "empty": "Inga bokade pass de närmaste 7 dagarna",
+    "error": "Kunde inte hämta passen"
+  },
+  "settings": {
+    "title": "SATS (inofficiell)",
+    "subtitle": "Medlemmar läggs till som enheter. Här finns bara inställningar för hela appen.",
+    "timeline": "Visa ändringar i väntelistan och inställda pass i Homeys tidslinje",
+    "timelineHint": "Flyttad från väntelistan till bokad, ändrad köplats och inställt pass."
   }
 }

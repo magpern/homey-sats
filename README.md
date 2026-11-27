@@ -21,12 +21,15 @@ each logged in with that member's own SATS account.
 |------|------|-------|
 | WHEN | *A booked class starts in [N] minutes* | Fires once per class, N minutes before it starts |
 | WHEN | *A booked class ends* | Needs an end time or duration from SATS |
-| WHEN | *A booked class was cancelled* | Fires when an upcoming class disappears or is marked cancelled. Detected at the next poll |
+| WHEN | *A class was cancelled* | A booked **or waiting-list** class was marked cancelled by SATS (`cancelled_by` = `SATS`) or disappeared from your bookings (`cancelled_by` = `unknown`). Detected at the next poll |
+| WHEN | *Moved from the waiting list to booked* | Tokens: class name, start, centre, previous position |
+| WHEN | *Waiting list position changed* | Tokens: class name, start, centre, old position, new position |
 | AND | *Class is within [N] km of home* | Distance from Homey's location to the class's centre |
 | AND | *Class is at one of my home centres* | Compares with *Home centres* in the device settings |
 
-All three triggers provide the tokens **class name, start, end, centre, city, country,
-distance_km** (distance from home in km, or `-1` when unknown).
+The class triggers provide the tokens **class name, start, end, centre, city, country,
+distance_km** (distance from home in km, or `-1` when unknown). *A class was cancelled* also
+has **previous_status** (booked / waiting list) and **cancelled_by**.
 
 The two device conditions check the class that triggered the Flow. If no trigger of this
 member fired in the last 10 minutes, they check the member's next class instead.
@@ -38,12 +41,37 @@ member fired in the last 10 minutes, they check the member's next class instead.
 | AND | *Any member has a booked class before [time] today/tomorrow* |
 | THEN | *Refresh bookings now* (all members) |
 
-The device tile shows the member's next class. Bookings are polled about every 30 minutes,
+**Device values** (on the tile and device page; also usable in Flows, and the numbers are logged in Insights):
+
+| Capability | Example |
+|------------|---------|
+| Next class | `Mon 06:30 Spinning, Example Centre` |
+| Booked classes | `3` upcoming booked classes |
+| On waiting list | `1` |
+| Best waiting-list position | `2`, or empty when not on any waiting list |
+
+**Dashboard widget "SATS classes"** (Homey Dashboards). It lists the next 7 days for one
+member or all members, picked in the widget settings. Columns: when, class, centre, who and
+status (*Booked*, *Waiting list #N*, *Cancelled*). Classes further from home than a set
+distance (default 10 km) get an *Away* badge. It updates as soon as bookings change, and every
+5 minutes as time passes. It's built for a wall tablet: large type, no hover-only information.
+
+![Widget preview with invented data](widgets/sats_classes/preview-light.png)
+
+**Timeline:** *moved to booked*, *waiting-list position changed* and *class cancelled* are also
+posted to the Homey timeline. Turn this off under *Apps → SATS (unofficial) → Configure app*.
+
+> Waiting-list support depends on details of the SATS API that aren't verified yet: whether
+> waiting-list places and positions are in the bookings data at all. If they aren't, the
+> waiting-list values stay at 0 or empty and those triggers never fire. Everything else works.
+> See [docs/sats-api.md](docs/sats-api.md#waiting-list-and-positions).
+ Bookings are polled about every 30 minutes,
 with ±10 % jitter. On errors the app retries after 2, 4, 8 … minutes, up to 4 hours between tries.
 Waiting-list places and self-planned workouts never fire triggers.
 
 ## Install (from a Mac)
 
+Requires a Homey Pro on firmware **12.3 or later** (needed for dashboard widgets).
 The app isn't in the Homey App Store. Install it on your own Homey Pro with the Homey CLI:
 
 1. Install Node.js LTS if you don't have it (for example from <https://nodejs.org> or with Homebrew):
@@ -189,10 +217,17 @@ homey app validate --level publish
 homey app run                    # run on your Homey with live logs
 ```
 
-Code layout: `lib/SatsClient.js` (auth and API), `lib/bookings.js` (tolerant response parser),
-`lib/scheduler.js` (trigger timing and conditions), `lib/geo.js` (distance and geocoding),
-`lib/MemberService.js` (per-member polling and backoff), `drivers/member/` (Homey device
-and pairing), `app.js` (app-level cards).
+Code layout:
+
+- `lib/SatsClient.js`: auth and API
+- `lib/bookings.js`: tolerant response parser
+- `lib/scheduler.js`: trigger timing, waiting-list transitions and conditions
+- `lib/geo.js`: distance and geocoding
+- `lib/present.js`: next-class text and the widget data model
+- `lib/MemberService.js`: per-member polling and backoff
+- `drivers/member/`: Homey device and pairing
+- `widgets/sats_classes/`: dashboard widget
+- `app.js`: app-level cards, timeline and widget data
 
 Test fixtures in `test/fixtures/` are **invented data**. Never commit real API responses or
 captures: they contain personal data and tokens. `captures/`, `*.har` and similar are git-ignored.

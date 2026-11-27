@@ -14,5 +14,27 @@
   },
   "errors": {
     "no_members": "No SATS members are paired yet. Add a SATS member device first."
+  },
+  "timeline": {
+    "promoted": "__member__: moved from the waiting list to booked for __class__ (__when__)",
+    "position": "__member__: waiting list for __class__ (__when__) now #__new__ (was #__old__)",
+    "cancelled": "__member__: __class__ (__when__) was cancelled"
+  },
+  "widget": {
+    "all_members": "All members",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "booked": "Booked",
+    "waitlist": "Waiting list",
+    "cancelled": "Cancelled",
+    "away": "Away",
+    "empty": "No booked classes in the next 7 days",
+    "error": "Could not load classes"
+  },
+  "settings": {
+    "title": "SATS (unofficial)",
+    "subtitle": "Members are added as devices. This page only has app-wide options.",
+    "timeline": "Post waiting-list changes and cancellations to the Homey timeline",
+    "timelineHint": "Moved from the waiting list to booked, waiting-list position changed, and class cancelled."
   }
 }

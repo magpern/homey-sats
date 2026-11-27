@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "On waiting list",
+    "sv": "På väntelista"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icon.svg",
+  "decimals": 0,
+  "min": 0,
+  "insights": true
+}

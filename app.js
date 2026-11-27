@@ -2,12 +2,14 @@
 
 const Homey = require('homey');
 const { Geocoder } = require('./lib/geo');
+const { buildWidgetModel } = require('./lib/present');
 
 /**
  * Unofficial SATS app for Homey.
  * Each SATS member is a device of the "member" driver (see drivers/member).
  * The app itself only holds shared things: the centre geocoding cache, the
- * home location, and the app-level Flow cards. No credentials live at app level.
+ * home location, the timeline setting, the dashboard widget and the app-level
+ * Flow cards. No credentials live at app level.
  */
 class SatsApp extends Homey.App {
   async onInit() {
@@ -31,6 +33,19 @@ class SatsApp extends Homey.App {
         return true;
       });
 
+    try {
+      this.homey.dashboards.getWidget('sats_classes')
+        .registerSettingAutocompleteListener('member', async (query) => {
+          const q = String(query || '').toLowerCase();
+          return [
+            { id: 'all', name: this.homey.__('widget.all_members') },
+            ...this.getMembers().map((d) => ({ id: d.getData().id, name: d.getName() })),
+          ].filter((o) => !q || o.name.toLowerCase().includes(q));
+        });
+    } catch (err) {
+      this.error('Dashboard widget not available on this Homey');
+    }
+
     this.log('SATS app started');
   }
 
@@ -49,6 +64,43 @@ class SatsApp extends Homey.App {
     const lon = Number(this.homey.geolocation.getLongitude());
     if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return null;
     return { lat, lon };
+  }
+
+  /** Data for the "SATS classes" widget. */
+  getWidgetData({ member = 'all', awayKm = 10 } = {}) {
+    return buildWidgetModel({
+      members: this.getMembers().map((d) => ({
+        id: d.getData().id,
+        name: d.getName(),
+        bookings: d.service.bookings,
+        cancelled: d.service.cancelled,
+      })),
+      member,
+      now: new Date(),
+      timeZone: this.homey.clock.getTimezone(),
+      home: this.getHomeLocation(),
+      awayKm,
+      locale: this.homey.i18n.getLanguage(),
+    });
+  }
+
+  /** Tell open widgets to reload. */
+  notifyBookingsChanged() {
+    try {
+      this.homey.api.realtime('bookings_changed', {});
+    } catch (e) {
+      // no listeners / not supported: widgets also poll
+    }
+  }
+
+  /** Post a waiting-list or cancellation change to the Homey timeline (app setting, default on). */
+  async postTimeline(text) {
+    if (this.homey.settings.get('timeline_notifications') === false) return;
+    try {
+      await this.homey.notifications.createNotification({ excerpt: text });
+    } catch (err) {
+      this.error('Could not post timeline notification');
+    }
   }
 }
 

@@ -2,9 +2,12 @@
 
 const Homey = require('homey');
 const { MemberService } = require('../../lib/MemberService');
-const { formatHHmm, localDateKey } = require('../../lib/time');
+const { formatNextClass, weekdayShort } = require('../../lib/present');
+const { formatHHmm } = require('../../lib/time');
 
 const RECONFIGURE_KEYS = ['market', 'path_segment', 'geocoding'];
+const CAPABILITIES = ['next_class', 'booked_count', 'waitlist_count', 'best_waitlist_position'];
+const OLD_CAPABILITIES = ['sats_next_class'];
 
 /**
  * A paired SATS member. Holds only a refresh token in its store (no password).
@@ -13,6 +16,7 @@ const RECONFIGURE_KEYS = ['market', 'path_segment', 'geocoding'];
 class MemberDevice extends Homey.Device {
   async onInit() {
     this._settings = this.getSettings();
+    await this._migrateCapabilities();
     const { driver } = this;
     this.service = new MemberService({
       store: {
@@ -32,7 +36,18 @@ class MemberDevice extends Homey.Device {
       events: {
         onStart: (tokens, state) => driver.startsCard.trigger(this, tokens, state),
         onEnd: (tokens, state) => driver.endsCard.trigger(this, tokens, state),
-        onCancelled: (tokens, state) => driver.cancelledCard.trigger(this, tokens, state),
+        onCancelled: (tokens, state, booking) => {
+          this._timeline('cancelled', tokens, booking);
+          return driver.cancelledCard.trigger(this, tokens, state);
+        },
+        onPromoted: (tokens, state, booking) => {
+          this._timeline('promoted', tokens, booking);
+          return driver.promotedCard.trigger(this, tokens, state);
+        },
+        onPositionChanged: (tokens, state, booking) => {
+          this._timeline('position', tokens, booking);
+          return driver.positionCard.trigger(this, tokens, state);
+        },
       },
       getStartOffsets: () => driver.getStartOffsets(this),
       onStatus: (status) => this._onStatus(status).catch(() => {}),
@@ -47,8 +62,33 @@ class MemberDevice extends Homey.Device {
       },
     });
     this.service.start();
+    // Show cached values right away, and keep counts current as classes pass.
+    this._onBookings(this.service.bookings).catch(() => {});
+    this._capTimer = this.homey.setInterval(() => this._updateCapabilities().catch(() => {}), 5 * 60 * 1000);
   }
 
+  async _migrateCapabilities() {
+    for (const cap of OLD_CAPABILITIES) {
+      if (this.hasCapability(cap)) await this.removeCapability(cap).catch(() => {});
+    }
+    for (const cap of CAPABILITIES) {
+      if (!this.hasCapability(cap)) await this.addCapability(cap).catch(() => this.error(`Could not add ${cap}`));
+    }
+  }
+
+  /** Post a change to the Homey timeline (if enabled in the app settings). */
+  _timeline(kind, tokens, booking) {
+    const tz = this.homey.clock.getTimezone();
+    const when = `${weekdayShort(booking.start, tz, this.homey.i18n.getLanguage())} ${formatHHmm(booking.start, tz)}`;
+    const text = this.homey.__(`timeline.${kind}`, {
+      member: this.getName(),
+      class: tokens.class_name,
+      when,
+      old: tokens.old_position,
+      new: tokens.new_position,
+    });
+    this.homey.app.postTimeline(text).catch(() => {});
+  }
   /** Called by the driver's repair flow after a successful login. */
   async setSession(refreshToken) {
     await this.setStoreValue('refreshToken', refreshToken);
@@ -74,20 +114,32 @@ class MemberDevice extends Homey.Device {
     }
   }
 
-  async _onBookings(bookings) {
-    const tz = this.homey.clock.getTimezone();
-    const next = bookings.find((b) => !b.waitlisted && b.start > new Date());
-    let text = this.homey.__('device.no_class');
-    if (next) {
-      const sameDay = localDateKey(next.start, tz) === localDateKey(new Date(), tz);
-      const when = sameDay ? formatHHmm(next.start, tz) : `${localDateKey(next.start, tz)} ${formatHHmm(next.start, tz)}`;
-      text = `${when} ${next.name}`;
-    }
-    await this.setCapabilityValue('sats_next_class', text);
+  async _onBookings() {
+    await this._updateCapabilities();
     const centres = this.service.knownCentres().join(', ');
     if (centres !== this._settings.known_centres) {
       await this.setSettings({ known_centres: centres });
       this._settings = { ...this._settings, known_centres: centres };
+    }
+    this.homey.app.notifyBookingsChanged();
+  }
+
+  async _updateCapabilities() {
+    const tz = this.homey.clock.getTimezone();
+    const sum = this.service.summary();
+    const next = sum.nextBooked
+      ? formatNextClass(sum.nextBooked, tz, this.homey.i18n.getLanguage())
+      : this.homey.__('device.no_class');
+    const values = {
+      next_class: next,
+      booked_count: sum.bookedCount,
+      waitlist_count: sum.waitlistCount,
+      best_waitlist_position: sum.bestWaitlistPosition, // null when not on any waiting list
+    };
+    for (const [cap, value] of Object.entries(values)) {
+      if (this.hasCapability(cap) && this.getCapabilityValue(cap) !== value) {
+        await this.setCapabilityValue(cap, value);
+      }
     }
   }
 
@@ -104,10 +156,16 @@ class MemberDevice extends Homey.Device {
   }
 
   async onDeleted() {
-    this.service.stop();
+    this._stop();
+    this.homey.app.notifyBookingsChanged();
   }
 
   async onUninit() {
+    this._stop();
+  }
+
+  _stop() {
+    if (this._capTimer) this.homey.clearInterval(this._capTimer);
     if (this.service) this.service.stop();
   }
 }

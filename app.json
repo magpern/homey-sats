@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.github.homeysats",
   "version": "1.0.0",
-  "compatibility": ">=8.0.0",
+  "compatibility": ">=12.3.0",
   "sdk": 3,
   "platforms": [
     "local"
@@ -373,12 +373,12 @@
       {
         "id": "class_cancelled",
         "title": {
-          "en": "A booked class was cancelled",
-          "sv": "Ett bokat pass ställdes in"
+          "en": "A class was cancelled",
+          "sv": "Ett pass ställdes in"
         },
         "hint": {
-          "en": "Fires when an upcoming booked class is cancelled or disappears from your bookings, whether you or SATS cancelled it. Detected at the next refresh.",
-          "sv": "Körs när ett kommande bokat pass ställs in eller försvinner från dina bokningar, oavsett om du eller SATS avbokade. Upptäcks vid nästa uppdatering."
+          "en": "Fires when an upcoming class, booked or on the waiting list, is cancelled by SATS (marked cancelled) or disappears from your bookings (cancelled_by is then \"unknown\": you may have unbooked it yourself). Detected at the next refresh.",
+          "sv": "Körs när ett kommande pass, bokat eller på väntelista, ställs in av SATS (markerat inställt) eller försvinner från dina bokningar (cancelled_by blir då \"unknown\": du kan ha avbokat själv). Upptäcks vid nästa uppdatering."
         },
         "tokens": [
           {
@@ -461,6 +461,169 @@
               "sv": "Avstånd hemifrån (km, -1 om okänt)"
             },
             "example": 3.2
+          },
+          {
+            "type": "string",
+            "name": "previous_status",
+            "title": {
+              "en": "Status before (booked / waiting list)",
+              "sv": "Status innan (bokat / väntelista)"
+            },
+            "example": {
+              "en": "booked",
+              "sv": "booked"
+            }
+          },
+          {
+            "type": "string",
+            "name": "cancelled_by",
+            "title": {
+              "en": "Cancelled by (SATS / unknown)",
+              "sv": "Inställt av (SATS / okänt)"
+            },
+            "example": {
+              "en": "SATS",
+              "sv": "SATS"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
+      },
+      {
+        "id": "waitlist_promoted",
+        "title": {
+          "en": "Moved from the waiting list to booked",
+          "sv": "Flyttad från väntelistan till bokad"
+        },
+        "hint": {
+          "en": "Fires when a class you were on the waiting list for becomes booked. Detected at the next refresh.",
+          "sv": "Körs när ett pass du stod på väntelista för blir bokat. Upptäcks vid nästa uppdatering."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "number",
+            "name": "previous_position",
+            "title": {
+              "en": "Previous position (-1 if unknown)",
+              "sv": "Tidigare köplats (-1 om okänd)"
+            },
+            "example": 2
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
+      },
+      {
+        "id": "waitlist_position_changed",
+        "title": {
+          "en": "Waiting list position changed",
+          "sv": "Köplatsen ändrades"
+        },
+        "hint": {
+          "en": "Fires when your position on a class's waiting list changes. Needs SATS to report the position.",
+          "sv": "Körs när din plats i ett pass väntelista ändras. Kräver att SATS anger köplatsen."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "number",
+            "name": "old_position",
+            "title": {
+              "en": "Old position",
+              "sv": "Tidigare köplats"
+            },
+            "example": 5
+          },
+          {
+            "type": "number",
+            "name": "new_position",
+            "title": {
+              "en": "New position",
+              "sv": "Ny köplats"
+            },
+            "example": 3
           }
         ],
         "args": [
@@ -481,7 +644,10 @@
       },
       "class": "other",
       "capabilities": [
-        "sats_next_class"
+        "next_class",
+        "booked_count",
+        "waitlist_count",
+        "best_waitlist_position"
       ],
       "platforms": [
         "local"
@@ -678,8 +844,73 @@
       "id": "member"
     }
   ],
+  "widgets": {
+    "sats_classes": {
+      "name": {
+        "en": "SATS classes",
+        "sv": "SATS-pass"
+      },
+      "height": 440,
+      "settings": [
+        {
+          "id": "member",
+          "type": "autocomplete",
+          "title": {
+            "en": "Member (empty = all members)",
+            "sv": "Medlem (tomt = alla medlemmar)"
+          }
+        },
+        {
+          "id": "away_km",
+          "type": "number",
+          "title": {
+            "en": "Mark classes further away than (km) as away",
+            "sv": "Markera pass längre bort än (km) som borta"
+          },
+          "value": 10,
+          "min": 0,
+          "max": 20000
+        }
+      ],
+      "api": {
+        "getClasses": {
+          "method": "GET",
+          "path": "/classes"
+        }
+      },
+      "id": "sats_classes"
+    }
+  },
   "capabilities": {
-    "sats_next_class": {
+    "best_waitlist_position": {
+      "type": "number",
+      "title": {
+        "en": "Best waiting-list position",
+        "sv": "Bästa köplats"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icon.svg",
+      "decimals": 0,
+      "min": 0,
+      "insights": true
+    },
+    "booked_count": {
+      "type": "number",
+      "title": {
+        "en": "Booked classes",
+        "sv": "Bokade pass"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icon.svg",
+      "decimals": 0,
+      "min": 0,
+      "insights": true
+    },
+    "next_class": {
       "type": "string",
       "title": {
         "en": "Next class",
@@ -690,6 +921,20 @@
       "uiComponent": "sensor",
       "icon": "/assets/icon.svg",
       "insights": false
+    },
+    "waitlist_count": {
+      "type": "number",
+      "title": {
+        "en": "On waiting list",
+        "sv": "På väntelista"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icon.svg",
+      "decimals": 0,
+      "min": 0,
+      "insights": true
     }
   }
 }

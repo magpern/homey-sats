@@ -1,9 +1,11 @@
 {
   "id": "com.github.homeysats",
   "version": "1.0.0",
-  "compatibility": ">=8.0.0",
+  "compatibility": ">=12.3.0",
   "sdk": 3,
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "name": {
     "en": "SATS (unofficial)",
     "sv": "SATS (inofficiell)"
@@ -12,8 +14,12 @@
     "en": "Let your home react to your booked SATS classes. Unofficial, not affiliated with SATS.",
     "sv": "Låt hemmet reagera på dina bokade SATS-pass. Inofficiell, inte kopplad till SATS."
   },
-  "category": ["tools"],
-  "permissions": ["homey:manager:geolocation"],
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+    "homey:manager:geolocation"
+  ],
   "images": {
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",

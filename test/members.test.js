@@ -216,8 +216,9 @@ test('the rotated refresh token is written to the device store; no password is e
   const a = makeMember({ fixture: 'upcoming-workouts.json', clock });
   await a.service.refresh();
   assert.equal(a.deviceStore.get('refreshToken'), 'fake-refresh-R1');
-  assert.deepEqual(Object.keys(a.deviceStore.store).sort(), ['bookingsCache', 'firedKeys', 'refreshToken'].filter((k) => k in a.deviceStore.store).sort());
-  assert.ok(!('password' in a.deviceStore.store));
+  const allowed = new Set(['refreshToken', 'bookingsCache', 'cancelledCache', 'firedKeys']);
+  for (const key of Object.keys(a.deviceStore.store)) assert.ok(allowed.has(key), `unexpected store key ${key}`);
+  assert.ok(!JSON.stringify(a.deviceStore.store).includes('password'));
 });
 
 test('logs and status never contain tokens, class names, centres or response data', async () => {

@@ -108,6 +108,28 @@ Accept: application/json
   - Timestamps with an offset are absolute. Timestamps without one are read as wall-clock time in the Homey's time zone.
   - Items whose booking state contains "cancel" are flagged as cancelled. A class that was upcoming and then disappears from the list is also reported as cancelled. If 3 or more upcoming classes vanish at once and nothing is left, that is treated as a probable format change and not reported.
 
+### Waiting list and positions
+
+| Item | Evidence | Status |
+|------|----------|--------|
+| The member app models waiting-list places | DTO names `com.sats.data.groupexercises.remote.dtos.GxBookingStateDto.BookedOnWaitingList`, `...GxBookingStateDto.NotBooked`, `com.sats.data.gxticket.network.dtos.UpcomingOnWaitingListDto`, `...MemberBookingInfoDto`; strings `bookingState`, `bookingStateDescription`, `memberParticipationState` | From app (S4) |
+| Waiting-list places appear in `upcoming-workouts` | Not determined. They might come from another endpoint (the `gxticket` package suggests one) | **Unverified** |
+| A numeric waiting-list position is returned | No position field name was identified | **Unverified** |
+
+So the API most likely exposes the waiting list, but the Homey app's waiting-list features rest on assumptions:
+
+- A booking counts as a waiting-list place when a state field (`bookingState`, `memberParticipationState`, `status`, `type` …, also inside `bookingInfo` / `memberBookingInfo`) contains "wait", or when `isOnWaitingList: true`, or when `waitingListPosition > 0`.
+- The position is read from the first positive integer in `waitingListPosition`, `waitlistPosition`, `positionInWaitingList`, `waitingListNumber`, `queuePosition` or `position`, on the booking or its booking-info object.
+- If the real response has no position, *Waiting list position changed* never fires, *best waiting-list position* stays empty, and the widget shows "Waiting list" without a number. Everything else still works.
+- If waiting-list places aren't in `upcoming-workouts` at all, *waitlist count* stays 0 and *Moved from the waiting list to booked* never fires. A newly booked class then simply shows up as booked.
+
+Transitions are detected by comparing two polls, matched on booking id + start time:
+
+- waiting list → booked: *moved to booked*
+- position changed, both known: *position changed*
+- booked or waiting list → marked cancelled: *class cancelled*, `cancelled_by = SATS`
+- booked or waiting list → gone: *class cancelled*, `cancelled_by = unknown`
+
 ### Centre location (for "within N km of home")
 
 Whether the bookings response includes centre coordinates or an address is **unverified**. The parser reads both if present:
@@ -137,6 +159,7 @@ These are all relative to the base URL above and all **from app**: `/profile`, `
 7. Rate limits and account-lockout thresholds. Keycloak brute-force protection may lock an account after repeated failed logins. The Homey app therefore logs in only when the user submits the pairing/repair form, never automatically.
 8. Whether the bookings response contains centre coordinates, an address, city and country, or only a name.
 9. Whether cancelled classes are marked as cancelled in the list or simply disappear.
+10. Whether waiting-list places are part of `upcoming-workouts`, and the field name and meaning of the waiting-list position.
 
 ## How to verify (for whoever runs the app with a real account)
 
