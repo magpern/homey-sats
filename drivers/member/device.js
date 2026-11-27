@@ -171,6 +171,10 @@ class MemberDevice extends Homey.Device {
     return this.service.isWithinKm(km);
   }
 
+  startsAt(args) {
+    return this.service.startsAt(args);
+  }
+
   isAtHomeCentre() {
     return this.service.isAtHomeCentre(this._settings.home_centres || '');
   }

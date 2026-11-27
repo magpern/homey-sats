@@ -24,6 +24,8 @@ class MemberDriver extends Homey.Driver {
 
     this.homey.flow.getConditionCard('class_within_km')
       .registerRunListener(async (args) => args.device.isWithinKm(args.km));
+    this.homey.flow.getConditionCard('class_starts_at')
+      .registerRunListener(async (args) => args.device.startsAt({ time: args.time, day: args.day }));
     this.homey.flow.getConditionCard('class_at_home_centre')
       .registerRunListener(async (args) => args.device.isAtHomeCentre());
   }

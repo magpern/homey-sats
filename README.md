@@ -25,6 +25,7 @@ each logged in with that member's own SATS account.
 | WHEN | *A class was cancelled* | A booked **or waiting-list** class was marked cancelled by SATS (`cancelled_by` = `SATS`) or disappeared from your bookings (`cancelled_by` = `unknown`). Detected at the next poll |
 | WHEN | *Moved from the waiting list to booked* | Tokens: class name, start, centre, previous position |
 | WHEN | *Waiting list position changed* | Tokens: class name, start, centre, old position, new position |
+| AND | *Class starts at [time] on [day]* | Picks out a weekly class by its start time and weekday (any day, weekdays, weekend or one weekday), so you don't have to type its name |
 | AND | *Class is within [N] km of home* | Distance from Homey's location to the class's centre |
 | AND | *Class is at one of my home centres* | Compares with *Home centres* in the device settings |
 

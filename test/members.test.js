@@ -126,6 +126,8 @@ test('a Stockholm class passes "within 10 km" and the home-centre condition', as
   await runTicks([a], clock, '2026-11-30T05:31:00+01:00');
   assert.equal(a.fired.length, 1);
   assert.equal(a.service.isWithinKm(10), true);
+  assert.equal(a.service.startsAt({ time: '06:30', day: 'mon' }), true, 'the class that just triggered');
+  assert.equal(a.service.startsAt({ time: '18:00', day: 'mon' }), false, 'not the evening class');
   assert.equal(a.service.isAtHomeCentre('example centre north\nExample Centre South'), true);
 });
 

@@ -202,3 +202,22 @@ test('old fired keys are pruned', () => {
   const keys = ['start|a|2026-11-28T05:30:00.000Z|60', 'end|b|2026-11-30T05:30:00.000Z|'];
   assert.deepEqual(pruneFiredKeys(keys, mon('12:00')), ['end|b|2026-11-30T05:30:00.000Z|']);
 });
+
+test('"class starts at [time] on [day]" matches local start time and weekday', () => {
+  const { startsAt } = require('../lib/scheduler');
+  const [strength, cycling] = bookings; // Monday 06:30 and Monday 18:00, Stockholm time
+  assert.equal(startsAt(cycling, { time: '18:00', day: 'mon' }, TZ), true);
+  assert.equal(startsAt(cycling, { time: '18:00', day: 'any' }, TZ), true);
+  assert.equal(startsAt(cycling, { time: '18:00', day: 'weekdays' }, TZ), true);
+  assert.equal(startsAt(cycling, { time: '18:00', day: 'weekend' }, TZ), false);
+  assert.equal(startsAt(cycling, { time: '18:00', day: 'tue' }, TZ), false);
+  assert.equal(startsAt(cycling, { time: '17:00', day: 'mon' }, TZ), false, 'UTC time does not match');
+  assert.equal(startsAt(strength, { time: '6:30', day: 'mon' }, TZ), true, 'H:mm is accepted');
+  assert.equal(startsAt(strength, { time: '18:00', day: 'mon' }, TZ), false);
+  assert.equal(startsAt(strength, { time: 'nonsense', day: 'mon' }, TZ), false);
+  assert.equal(startsAt(null, { time: '18:00', day: 'mon' }, TZ), false);
+  // The weekday is the local one: 00:30 Saturday in Stockholm is still Friday in UTC.
+  const late = { start: new Date('2026-12-04T23:30:00Z') };
+  assert.equal(startsAt(late, { time: '00:30', day: 'sat' }, TZ), true);
+  assert.equal(startsAt(late, { time: '00:30', day: 'fri' }, TZ), false);
+});

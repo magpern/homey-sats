@@ -80,6 +80,120 @@
         "id": "any_member_class_before"
       },
       {
+        "id": "class_starts_at",
+        "title": {
+          "en": "Class !{{starts|doesn't start}} at … on …",
+          "sv": "Passet !{{börjar|börjar inte}} kl … på …"
+        },
+        "titleFormatted": {
+          "en": "Class !{{starts|doesn't start}} at [[time]] on [[day]]",
+          "sv": "Passet !{{börjar|börjar inte}} kl [[time]] på [[day]]"
+        },
+        "hint": {
+          "en": "Checks the class that triggered this Flow (or else the member's next class): its start time in Homey's time zone and its weekday. Use it to pick out a weekly class without typing its name.",
+          "sv": "Kontrollerar passet som startade detta flöde (annars medlemmens nästa pass): starttiden i Homeys tidszon och veckodagen. Välj ut ett veckopass utan att skriva dess namn."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          },
+          {
+            "type": "time",
+            "name": "time",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "placeholder": {
+              "en": "18:00",
+              "sv": "18:00"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "day",
+            "title": {
+              "en": "Day",
+              "sv": "Dag"
+            },
+            "values": [
+              {
+                "id": "any",
+                "label": {
+                  "en": "Any day",
+                  "sv": "Vilken dag som helst"
+                }
+              },
+              {
+                "id": "weekdays",
+                "label": {
+                  "en": "Weekdays (Mon–Fri)",
+                  "sv": "Vardagar (mån–fre)"
+                }
+              },
+              {
+                "id": "weekend",
+                "label": {
+                  "en": "Weekend (Sat–Sun)",
+                  "sv": "Helg (lör–sön)"
+                }
+              },
+              {
+                "id": "mon",
+                "label": {
+                  "en": "Monday",
+                  "sv": "måndag"
+                }
+              },
+              {
+                "id": "tue",
+                "label": {
+                  "en": "Tuesday",
+                  "sv": "tisdag"
+                }
+              },
+              {
+                "id": "wed",
+                "label": {
+                  "en": "Wednesday",
+                  "sv": "onsdag"
+                }
+              },
+              {
+                "id": "thu",
+                "label": {
+                  "en": "Thursday",
+                  "sv": "torsdag"
+                }
+              },
+              {
+                "id": "fri",
+                "label": {
+                  "en": "Friday",
+                  "sv": "fredag"
+                }
+              },
+              {
+                "id": "sat",
+                "label": {
+                  "en": "Saturday",
+                  "sv": "lördag"
+                }
+              },
+              {
+                "id": "sun",
+                "label": {
+                  "en": "Sunday",
+                  "sv": "söndag"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "class_within_km",
         "title": {
           "en": "Class !{{is|is not}} within … km of home",
