@@ -6,7 +6,7 @@ const { formatNextClass, weekdayShort } = require('../../lib/present');
 const { formatHHmm } = require('../../lib/time');
 
 const RECONFIGURE_KEYS = ['market', 'path_segment', 'geocoding'];
-const CAPABILITIES = ['next_class', 'booked_count', 'waitlist_count', 'best_waitlist_position'];
+const CAPABILITIES = ['next_class', 'next_waitlist_class', 'booked_count', 'waitlist_count', 'best_waitlist_position'];
 const OLD_CAPABILITIES = ['sats_next_class'];
 
 /**
@@ -130,8 +130,12 @@ class MemberDevice extends Homey.Device {
     const next = sum.nextBooked
       ? formatNextClass(sum.nextBooked, tz, this.homey.i18n.getLanguage())
       : this.homey.__('device.no_class');
+    const nextWaiting = sum.nextWaitlisted
+      ? formatNextClass(sum.nextWaitlisted, tz, this.homey.i18n.getLanguage())
+      : this.homey.__('device.no_waitlist_class');
     const values = {
       next_class: next,
+      next_waitlist_class: nextWaiting,
       booked_count: sum.bookedCount,
       waitlist_count: sum.waitlistCount,
       best_waitlist_position: sum.bestWaitlistPosition, // null when not on any waiting list

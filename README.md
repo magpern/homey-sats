@@ -8,7 +8,8 @@ an hour before a morning class, but only if you're home and the class is near ho
 > (SATS ASA / SATS Group).** It uses the same private API as the SATS mobile app. SATS hasn't
 > documented that API and **may change it at any time without notice**, and the app would stop
 > working until it's updated. Use it only with your own SATS account, at your own risk.
-> Several parts of the API are still unverified; see [docs/sats-api.md](docs/sats-api.md).
+> Login and the bookings call were verified against the live API on 2026-11-27; a few details
+> are still unverified. See [docs/sats-api.md](docs/sats-api.md).
 
 ## Features
 
@@ -45,7 +46,8 @@ member fired in the last 10 minutes, they check the member's next class instead.
 
 | Capability | Example |
 |------------|---------|
-| Next class | `Mon 06:30 Spinning, Example Centre` |
+| Next class | `Mon 06:30 Spinning, Example Centre`: the next **booked** class |
+| Next waiting-list class | `Tue 07:00 Yoga, Example Centre (#3)`: the next class you're on the waiting list for, with your position |
 | Booked classes | `3` upcoming booked classes |
 | On waiting list | `1` |
 | Best waiting-list position | `2`, or empty when not on any waiting list |
@@ -61,9 +63,9 @@ distance (default 10 km) get an *Away* badge. It updates as soon as bookings cha
 **Timeline:** *moved to booked*, *waiting-list position changed* and *class cancelled* are also
 posted to the Homey timeline. Turn this off under *Apps → SATS (unofficial) → Configure app*.
 
-> Waiting-list support depends on details of the SATS API that aren't verified yet: whether
-> waiting-list places and positions are in the bookings data at all. If they aren't, the
-> waiting-list values stay at 0 or empty and those triggers never fire. Everything else works.
+> Waiting-list places are part of the SATS bookings data, with their own booking state and a
+> position field (seen live on 2026-11-27). The *moved to booked* and *position changed*
+> transitions haven't been seen happen live yet.
 > See [docs/sats-api.md](docs/sats-api.md#waiting-list-and-positions).
  Bookings are polled about every 30 minutes,
 with ±10 % jitter. On errors the app retries after 2, 4, 8 … minutes, up to 4 hours between tries.
@@ -140,7 +142,8 @@ so never end up in Homey diagnostic reports. The log only shows counts, states a
   Homey device settings have no multi-select, so the list underneath, *Centres in your bookings*,
   fills in automatically with the centres from your bookings. Copy names from there.
 - **Look up centre locations with OpenStreetMap** (see below), on by default.
-- **API path segment**: leave empty. It's only a workaround while the API is unverified
+- **API path segment**: leave empty. The app uses the member id from your SATS login. It's
+  only for troubleshooting if SATS changes its API
   ([docs](docs/sats-api.md#upcoming-booked-workouts-used-by-this-homey-app)).
 
 ## Distance from home
@@ -152,8 +155,9 @@ so never end up in Homey diagnostic reports. The log only shows counts, states a
   OpenStreetMap Nominatim. Only the centre's public name/address is sent. Each centre is looked
   up once and cached, at most one request per second. Turn this off in the device settings if
   you prefer. Then the distance is unknown for those centres.
-- Which source applies is not yet known: it's unverified whether the SATS API returns
-  coordinates. When neither works, `distance_km` is `-1` and *within N km* is **false**.
+- In practice the SATS bookings data has only the centre's name (seen live on 2026-11-27, no
+  coordinates or address), so the name is geocoded. When that finds nothing, `distance_km` is
+  `-1` and *within N km* is **false**.
 
 ## Example Flow: open the bedroom curtains before a morning class
 
@@ -205,7 +209,7 @@ For reliable presence:
 | Device shows | Meaning / fix |
 |--------------|---------------|
 | *SATS session expired … Repair* | Refresh token expired or revoked (e.g. password changed). Repair the device and log in again. |
-| Warning *No upcoming-workouts endpoint accepted the request* | The unverified API path guess didn't work for your account. See [docs/sats-api.md](docs/sats-api.md) and open an issue, **without** pasting any personal data or tokens. |
+| Warning *No upcoming-workouts endpoint accepted the request* | The bookings path didn't work for your account; SATS may have changed its API. See [docs/sats-api.md](docs/sats-api.md) and open an issue, **without** pasting any personal data or tokens. |
 | Warning with an HTTP status | SATS was unreachable or returned an error. The app retries with backoff by itself. |
 | *Class is within N km* is always false | Check Homey's location, and that geocoding is on or SATS provides coordinates. |
 

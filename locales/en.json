@@ -10,7 +10,8 @@
   },
   "device": {
     "session_expired": "SATS session expired. Open the device, choose Repair and log in again.",
-    "no_class": "No booked class"
+    "no_class": "No booked class",
+    "no_waitlist_class": "Not on a waiting list"
   },
   "errors": {
     "no_members": "No SATS members are paired yet. Add a SATS member device first."

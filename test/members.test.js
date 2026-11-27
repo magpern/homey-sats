@@ -145,7 +145,7 @@ test('a class that disappears between polls fires "class cancelled" once', async
     handler: (call) => (call.url === TOKEN_URL ? { status: 200, body: tokenResponse() } : { status: 200, body: fixture }),
   });
   await a.service.refresh();
-  fixture = { upcomingWorkouts: fixture.upcomingWorkouts.filter((w) => w.id !== 'gx-1002') };
+  fixture = { workouts: fixture.workouts.filter((w) => w.content.id !== 'gx-1002') };
   await a.service.refresh();
   await a.service.refresh();
   const cancelled = a.fired.filter((f) => f.kind === 'cancelled');

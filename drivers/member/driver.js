@@ -13,8 +13,9 @@ class MemberDriver extends Homey.Driver {
   async onInit() {
     this.startsCard = this.homey.flow.getDeviceTriggerCard('class_starts_in');
     this.startsCard.registerRunListener(async (args, state) => Number(args.minutes) === state.minutes);
+    this._startArgs = new Map(); // device id -> argument values of Flows using the card
     this.startsCard.on('update', () => {
-      this._startArgs = null; // a Flow using the card changed: re-read the minute values
+      this._startArgs.clear(); // a Flow using the card changed: re-read the minute values
     });
     this.endsCard = this.homey.flow.getDeviceTriggerCard('class_ends');
     this.cancelledCard = this.homey.flow.getDeviceTriggerCard('class_cancelled');
@@ -29,9 +30,11 @@ class MemberDriver extends Homey.Driver {
 
   /** Distinct "starts in N minutes" values used in Flows for this device. */
   async getStartOffsets(device) {
-    if (!this._startArgs) {
+    const id = device.getData().id;
+    if (!this._startArgs.has(id)) {
       try {
-        this._startArgs = (await this.startsCard.getArgumentValues()) || [];
+        // SDK v3: a device trigger card returns the argument values of the Flows for one device.
+        this._startArgs.set(id, (await this.startsCard.getArgumentValues(device)) || []);
       } catch (err) {
         // No Flows using the card yet (or not supported here): nothing to schedule.
         if (!this._offsetErrorLogged) this.error(`Could not read "starts in" Flow arguments: ${err.message}`);
@@ -39,13 +42,8 @@ class MemberDriver extends Homey.Driver {
         return [];
       }
     }
-    const id = device.getData().id;
-    const isThisDevice = (d) => Boolean(d) && (d === device
-      || (typeof d.getData === 'function' && d.getData().id === id)
-      || (d.data && d.data.id === id)
-      || d.id === id);
-    return [...new Set(this._startArgs
-      .filter((a) => a && isThisDevice(a.device))
+    return [...new Set(this._startArgs.get(id)
+      .filter(Boolean)
       .map((a) => Number(a.minutes))
       .filter((n) => Number.isFinite(n) && n >= 0))];
   }

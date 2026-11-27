@@ -14,27 +14,37 @@ const TOKEN_URL = 'https://auth.satsgroup.com/realms/sats/protocol/openid-connec
 const TZ = 'Europe/Stockholm';
 const HOME = { lat: 59.3293, lon: 18.0686 };
 
-/** All data invented. One class whose booking state the tests change between polls. */
-function workout({ state = 'BOOKED', position, cancelled = false } = {}) {
-  const bookingInfo = { bookingState: cancelled ? 'CANCELLED' : state };
-  if (position !== undefined) bookingInfo.waitingListPosition = position;
+/**
+ * All data invented, in the shape observed live (docs/sats-api.md).
+ * One class whose booking state the tests change between polls.
+ * "Cancelled" is not a state seen live; it stands in for whatever SATS sends.
+ */
+function workout({ state = 'Booked', position = null, cancelled = false } = {}) {
+  const item = (id, name, dateTime, durationInMinutes, memberBookingInfo) => ({
+    type: 'upcoming-group-exercise',
+    content: {
+      id,
+      name,
+      startTime: { timeZone: 'Europe/Stockholm', dateTime },
+      durationInMinutes,
+      club: {
+        name: 'Example Centre North', id: 'c-1', fullName: 'Example Centre North (Example Town)', latitude: 59.342, longitude: 18.049,
+      },
+      instructorName: 'Instructor A',
+      bookingInfo: {
+        capacity: 20, bookedCount: 20, waitingListCount: 4, memberBookingInfo,
+      },
+      followingBookings: [],
+    },
+  });
   return {
-    upcomingWorkouts: [
-      {
-        id: 'gx-7001',
-        name: 'Spinning 45',
-        startTime: '2026-12-01T06:30:00+01:00',
-        endTime: '2026-12-01T07:15:00+01:00',
-        club: { name: 'Example Centre North', latitude: 59.342, longitude: 18.049 },
-        bookingInfo,
-      },
-      {
-        id: 'gx-7002',
-        name: 'Core 30',
-        startTime: '2026-12-02T12:00:00+01:00',
-        club: { name: 'Example Centre North', latitude: 59.342, longitude: 18.049 },
-        bookingInfo: { bookingState: 'BOOKED' },
-      },
+    workouts: [
+      item('gx-7001', 'Spinning 45', '2026-12-01T05:30:00Z', 45, {
+        participationId: 'p-7001', bookingState: cancelled ? 'Cancelled' : state, waitingListPosition: position,
+      }),
+      item('gx-7002', 'Core 30', '2026-12-02T11:00:00Z', 30, {
+        participationId: 'p-7002', bookingState: 'Booked', waitingListPosition: null,
+      }),
     ],
   };
 }
@@ -72,13 +82,15 @@ function member(initial) {
 const kinds = (fired) => fired.map((f) => f.kind);
 
 test('waiting list -> booked between two polls fires "moved to booked" with the previous position', async () => {
-  const m = member(workout({ state: 'ON_WAITING_LIST', position: 2 }));
+  const m = member(workout({ state: 'BookedOnWaitingList', position: 2 }));
   await m.service.refresh();
   assert.deepEqual(m.service.summary().waitlistCount, 1);
   assert.equal(m.service.summary().bestWaitlistPosition, 2);
   assert.equal(m.service.summary().bookedCount, 1);
+  assert.equal(m.service.summary().nextWaitlisted.name, 'Spinning 45');
+  assert.equal(m.service.summary().nextBooked.name, 'Core 30', 'next_class stays booked-only');
 
-  m.setBody(workout({ state: 'BOOKED' }));
+  m.setBody(workout({ state: 'Booked' }));
   await m.service.refresh();
   assert.deepEqual(kinds(m.fired), ['promoted']);
   assert.deepEqual(m.fired[0].tokens, {
@@ -103,9 +115,9 @@ test('waiting list -> booked between two polls fires "moved to booked" with the 
 });
 
 test('booked -> waiting list between two polls: no promotion, counts move, no start trigger', async () => {
-  const m = member(workout({ state: 'BOOKED' }));
+  const m = member(workout({ state: 'Booked' }));
   await m.service.refresh();
-  m.setBody(workout({ state: 'ON_WAITING_LIST', position: 4 }));
+  m.setBody(workout({ state: 'BookedOnWaitingList', position: 4 }));
   await m.service.refresh();
   assert.deepEqual(kinds(m.fired), []);
   const sum = m.service.summary();
@@ -120,9 +132,9 @@ test('booked -> waiting list between two polls: no promotion, counts move, no st
 });
 
 test('waiting-list position change fires once with old and new position', async () => {
-  const m = member(workout({ state: 'ON_WAITING_LIST', position: 5 }));
+  const m = member(workout({ state: 'BookedOnWaitingList', position: 5 }));
   await m.service.refresh();
-  m.setBody(workout({ state: 'ON_WAITING_LIST', position: 3 }));
+  m.setBody(workout({ state: 'BookedOnWaitingList', position: 3 }));
   await m.service.refresh();
   await m.service.refresh(); // unchanged: no second event
   assert.deepEqual(kinds(m.fired), ['positionChanged']);
@@ -133,15 +145,15 @@ test('waiting-list position change fires once with old and new position', async 
 });
 
 test('unknown positions never fire a position change', async () => {
-  const m = member(workout({ state: 'ON_WAITING_LIST' }));
+  const m = member(workout({ state: 'BookedOnWaitingList' }));
   await m.service.refresh();
-  m.setBody(workout({ state: 'ON_WAITING_LIST', position: 3 }));
+  m.setBody(workout({ state: 'BookedOnWaitingList', position: 3 }));
   await m.service.refresh();
   assert.deepEqual(kinds(m.fired), []);
 });
 
 test('"class cancelled" fires for a waiting-list class, and says SATS when SATS marked it', async () => {
-  const m = member(workout({ state: 'ON_WAITING_LIST', position: 2 }));
+  const m = member(workout({ state: 'BookedOnWaitingList', position: 2 }));
   await m.service.refresh();
   m.setBody(workout({ cancelled: true }));
   await m.service.refresh();
@@ -151,7 +163,7 @@ test('"class cancelled" fires for a waiting-list class, and says SATS when SATS 
   assert.equal(m.service.cancelled.length, 1, 'kept for the widget');
 
   // A booked class that simply disappears: cancelled_by unknown.
-  m.setBody({ upcomingWorkouts: [workout().upcomingWorkouts[0]] });
+  m.setBody({ workouts: [workout().workouts[0]] });
   await m.service.refresh();
   const last = m.fired.at(-1);
   assert.equal(last.kind, 'cancelled');
@@ -206,6 +218,13 @@ test('widget model: two members, next 7 days, status, away flag and member filte
   assert.equal(noHome.homeKnown, false);
 });
 
+test('next waiting-list class text carries the position', () => {
+  const all = parseUpcomingWorkouts(loadFixture('upcoming-workouts.json'), { timeZone: TZ, includeWaitlisted: true });
+  const yoga = all.find((b) => b.id === 'gx-1003');
+  assert.equal(formatNextClass(yoga, TZ, 'en'), 'Tue 07:00 Yoga Flow, Example Centre North (#3)');
+  assert.equal(formatNextClass({ ...yoga, waitlistPosition: null }, TZ, 'en'), 'Tue 07:00 Yoga Flow, Example Centre North');
+});
+
 test('next_class text: weekday, time, class, centre', () => {
   const [b] = parseUpcomingWorkouts(loadFixture('upcoming-workouts.json'), { timeZone: TZ });
   assert.equal(formatNextClass(b, TZ, 'en'), 'Mon 06:30 Strength 45, Example Centre North');
@@ -214,7 +233,7 @@ test('next_class text: weekday, time, class, centre', () => {
 });
 
 test('parser reads waiting-list positions from booking info', () => {
-  const [b] = parseUpcomingWorkouts(workout({ state: 'ON_WAITING_LIST', position: 7 }), { timeZone: TZ, includeWaitlisted: true });
+  const [b] = parseUpcomingWorkouts(workout({ state: 'BookedOnWaitingList', position: 7 }), { timeZone: TZ, includeWaitlisted: true });
   assert.equal(b.waitlisted, true);
   assert.equal(b.waitlistPosition, 7);
   const [booked] = parseUpcomingWorkouts(workout(), { timeZone: TZ, includeWaitlisted: true });

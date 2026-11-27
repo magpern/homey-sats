@@ -1,21 +1,37 @@
 {
-  "_comment": "INVENTED test data for 'member B', not a real member's bookings. One class is in Oslo and has no coordinates, so the geocoder has to look it up.",
-  "upcomingWorkouts": [
+  "_comment": "INVENTED test data for 'member B', not a real member's bookings. Shape as observed live on 2026-11-27 (docs/sats-api.md); all values are made up. The coordinates on gx-5001 were not seen live. gx-5002 is in Oslo and has no coordinates, so the geocoder has to look it up.",
+  "workouts": [
     {
       "type": "upcoming-group-exercise",
-      "id": "gx-5001",
-      "name": "Core 30",
-      "startTime": "2026-11-30T12:00:00+01:00",
-      "endTime": "2026-11-30T12:30:00+01:00",
-      "club": { "id": "c-1", "name": "Example Centre North", "city": "Stockholm", "country": "Sweden", "latitude": 59.3420, "longitude": 18.0490 }
+      "content": {
+        "id": "gx-5001",
+        "name": "Core 30",
+        "startTime": { "timeZone": "Europe/Stockholm", "dateTime": "2026-11-30T11:00:00Z" },
+        "durationInMinutes": 30,
+        "club": { "name": "Example Centre North", "id": "c-1", "fullName": "Example Centre North (Example Town)", "city": "Stockholm", "country": "Sweden", "latitude": 59.3420, "longitude": 18.0490 },
+        "instructorName": "Instructor D",
+        "bookingInfo": {
+          "capacity": 30, "bookedCount": 8, "waitingListCount": 0,
+          "memberBookingInfo": { "participationId": "p-0101", "bookingState": "Booked", "waitingListPosition": null }
+        },
+        "followingBookings": []
+      }
     },
     {
       "type": "upcoming-group-exercise",
-      "id": "gx-5002",
-      "name": "Spinning 45",
-      "startTime": "2026-12-01T07:00:00+01:00",
-      "endTime": "2026-12-01T07:45:00+01:00",
-      "club": { "id": "c-9", "name": "Example Centre Oslo", "city": "Oslo", "country": "Norway" }
+      "content": {
+        "id": "gx-5002",
+        "name": "Spinning 45",
+        "startTime": { "timeZone": "Europe/Oslo", "dateTime": "2026-12-01T06:00:00Z" },
+        "durationInMinutes": 45,
+        "club": { "name": "Example Centre Oslo", "id": "c-9", "fullName": "Example Centre Oslo (Example City)" },
+        "instructorName": "Instructor E",
+        "bookingInfo": {
+          "capacity": 30, "bookedCount": 30, "waitingListCount": 0,
+          "memberBookingInfo": { "participationId": "p-0102", "bookingState": "Booked", "waitingListPosition": null }
+        },
+        "followingBookings": []
+      }
     }
   ]
 }

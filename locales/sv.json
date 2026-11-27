@@ -10,7 +10,8 @@
   },
   "device": {
     "session_expired": "SATS-sessionen har gått ut. Öppna enheten, välj Reparera och logga in igen.",
-    "no_class": "Inget bokat pass"
+    "no_class": "Inget bokat pass",
+    "no_waitlist_class": "Inte i kö till något pass"
   },
   "errors": {
     "no_members": "Inga SATS-medlemmar är tillagda än. Lägg till en SATS-medlem först."

@@ -6,6 +6,7 @@
   "class": "other",
   "capabilities": [
     "next_class",
+    "next_waitlist_class",
     "booked_count",
     "waitlist_count",
     "best_waitlist_position"
@@ -192,8 +193,8 @@
             "sv": "API-sökvägssegment"
           },
           "hint": {
-            "en": "Leave empty. Only set this if the device reports that the bookings endpoint was not found (see docs/sats-api.md).",
-            "sv": "Lämna tomt. Ange bara om enheten rapporterar att bokningsadressen inte hittades (se docs/sats-api.md)."
+            "en": "Leave empty: the app uses the member id from your SATS login. Only for troubleshooting if SATS changes its API (see docs/sats-api.md).",
+            "sv": "Lämna tomt: appen använder medlems-id:t från din SATS-inloggning. Bara för felsökning om SATS ändrar sitt API (se docs/sats-api.md)."
           }
         }
       ]

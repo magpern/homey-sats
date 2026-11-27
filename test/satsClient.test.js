@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { SatsClient, SatsAuthError, SatsError } = require('../lib/SatsClient');
 const {
-  TEST_USERNAME, TEST_PASSWORD, tokenResponse, fakeTransport, loadFixture,
+  TEST_USERNAME, TEST_PASSWORD, tokenResponse, fakeTransport, loadFixture, fakeJwt,
 } = require('./helpers');
 
 const TOKEN_URL = 'https://auth.satsgroup.com/realms/sats/protocol/openid-connect/token';
@@ -101,7 +101,7 @@ test('a client restored from a stored refresh token never needs the password', a
   });
   const apiCall = transport.calls[1];
   assert.equal(apiCall.method, 'GET');
-  assert.equal(apiCall.url, `${API}/v2/se/upcoming-workouts`);
+  assert.equal(apiCall.url, `${API}/profile/v2/999999/upcoming-workouts`, 'segment is the exerpMemberId claim');
   assert.match(apiCall.headers.Authorization, /^Bearer ey/);
   assert.equal(apiCall.headers['Accept-Language'], 'sv-SE');
   assert.deepEqual(client.saved, ['fake-refresh-R1'], 'rotated refresh token is persisted');
@@ -138,20 +138,32 @@ test('access token is reused until it expires, then renewed', async () => {
   assert.equal(tokenCalls[1].refresh_token, 'fake-refresh-R1', 'uses the rotated token');
 });
 
-test('booking list: tries the next path segment on 404 and remembers the one that works', async () => {
+test('booking list: uses the exerpMemberId, falls back to externalId on 404, and remembers what works', async () => {
+  const claims = { sub: 'user-0000-test', exerpMemberId: '999999', externalId: 'ext-0000-test' };
   const transport = fakeTransport((call) => {
-    if (call.url === TOKEN_URL) return { status: 200, body: tokenResponse() };
-    if (call.url.endsWith('/v2/sats/upcoming-workouts')) return { status: 200, body: { upcomingWorkouts: [] } };
+    if (call.url === TOKEN_URL) return { status: 200, body: { ...tokenResponse(), access_token: fakeJwt(claims) } };
+    if (call.url.endsWith('/profile/v2/ext-0000-test/upcoming-workouts')) return { status: 200, body: { workouts: [] } };
     return { status: 404, body: { message: 'Not found' } };
   });
   const client = makeClient(transport, { refreshToken: 'r0' });
   await client.getUpcomingWorkouts();
-  assert.equal(client.resolvedSegment, 'sats');
+  const tried = transport.calls.filter((c) => c.url !== TOKEN_URL).map((c) => c.url);
+  assert.deepEqual(tried, [`${API}/profile/v2/999999/upcoming-workouts`, `${API}/profile/v2/ext-0000-test/upcoming-workouts`]);
+  assert.equal(client.resolvedSegment, 'ext-0000-test');
 
   transport.calls.length = 0;
   await client.getUpcomingWorkouts();
   assert.equal(transport.calls.length, 1);
-  assert.ok(transport.calls[0].url.endsWith('/v2/sats/upcoming-workouts'));
+  assert.ok(transport.calls[0].url.endsWith('/profile/v2/ext-0000-test/upcoming-workouts'));
+});
+
+test('a wrong segment answers 500 (observed live) and is reported, not retried with guesses', async () => {
+  const transport = fakeTransport((call) => (call.url === TOKEN_URL
+    ? { status: 200, body: tokenResponse() }
+    : { status: 500, body: {} }));
+  const client = makeClient(transport, { refreshToken: 'r0' });
+  await assert.rejects(client.getUpcomingWorkouts(), { code: 'HTTP', status: 500 });
+  assert.equal(transport.calls.filter((c) => c.url !== TOKEN_URL).length, 1);
 });
 
 test('a configured path segment is used as-is', async () => {
@@ -161,7 +173,7 @@ test('a configured path segment is used as-is', async () => {
   const client = makeClient(transport, { refreshToken: 'r0', pathSegment: 'custom' });
   await assert.rejects(client.getUpcomingWorkouts(), { code: 'ENDPOINT_NOT_FOUND' });
   const apiCalls = transport.calls.filter((c) => c.url !== TOKEN_URL);
-  assert.deepEqual(apiCalls.map((c) => c.url), [`${API}/v2/custom/upcoming-workouts`]);
+  assert.deepEqual(apiCalls.map((c) => c.url), [`${API}/profile/v2/custom/upcoming-workouts`]);
 });
 
 test('401 from the API forces a token refresh and one retry', async () => {
@@ -211,6 +223,29 @@ test('shapeOf lists key names only and masks id-like keys', () => {
   assert.equal(shape, '{firstName,email,items:[1]{id,name,startTime},byDate:{<key>:{count},<key>}}');
   for (const secret of ['Invented Person', 'someone@example.com', 'Strength 45', '2026-11-30']) {
     assert.ok(!shape.includes(secret));
+  }
+});
+
+test('shapeOf shows booking-state enums but no values in lists about other bookings or people', () => {
+  const { shapeOf } = require('../lib/SatsClient');
+  const live = {
+    workouts: [{
+      type: 'upcoming-group-exercise',
+      content: {
+        name: 'Strength 45',
+        startTime: { timeZone: 'Europe/Stockholm', dateTime: '2026-11-30T06:30:00' },
+        instructorName: 'Instructor A',
+        bookingInfo: { memberBookingInfo: { bookingState: 'BookedOnWaitingList', waitingListPosition: 3 } },
+        followingBookings: [{ status: 'Booked', name: 'Member B' }],
+      },
+    }],
+  };
+  assert.equal(shapeOf(live), '{workouts:[1]{type=upcoming-group-exercise,content:{name,startTime:{…},instructorName,bookingInfo:{…},followingBookings:[1]}}}');
+  const deep = shapeOf(live, { maxDepth: 8 });
+  assert.equal(deep, '{workouts:[1]{type=upcoming-group-exercise,content:{name,startTime:{timeZone,dateTime},instructorName,'
+    + 'bookingInfo:{memberBookingInfo:{bookingState=BookedOnWaitingList,waitingListPosition}},followingBookings:[1]{status,name}}}}');
+  for (const secret of ['Strength 45', 'Instructor A', 'Europe/Stockholm', '2026', 'Member B', '=Booked}']) {
+    assert.ok(!deep.includes(secret), secret);
   }
 });
 
