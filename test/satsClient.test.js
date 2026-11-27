@@ -15,6 +15,7 @@ function makeClient(transport, extra = {}) {
   const saved = [];
   const client = new SatsClient({
     transport,
+    diagnosticDelayMs: 0,
     now: () => now,
     onRefreshToken: (t) => saved.push(t),
     ...extra,
@@ -213,11 +214,13 @@ test('shapeOf lists key names only and masks id-like keys', () => {
   }
 });
 
-test('diagnostics report status codes and shapes, masking member ids from the token', async () => {
+test('diagnostics sweep prefixes, report status codes and shapes, and mask member ids', async () => {
   const transport = fakeTransport((call) => {
     if (call.url === TOKEN_URL) return { status: 200, body: tokenResponse() };
-    if (call.url.endsWith('/profile')) return { status: 200, body: { firstName: 'Invented Person', market: 'se' } };
-    if (call.url.endsWith('/v2/999999/upcoming-workouts')) return { status: 200, body: { upcoming: [{ name: 'Strength 45' }] } };
+    if (call.url.endsWith('/v2/booking-landing-page')) {
+      return { status: 200, body: { items: [{ type: 'GxOfferings', content: { title: 'x' } }, { type: 'Recommendation', content: { list: [] } }] } };
+    }
+    if (call.url.endsWith('/profile/v2/999999/upcoming-workouts')) return { status: 200, body: { upcoming: [{ name: 'Strength 45', type: 'upcoming-group-exercise' }] } };
     return { status: 404, body: { message: 'Not found' } };
   });
   const client = makeClient(transport, { refreshToken: 'r0' });
@@ -228,8 +231,9 @@ test('diagnostics report status codes and shapes, masking member ids from the to
   assert.ok(!text.includes('user-0000-test'), 'sub is masked');
   assert.ok(!text.includes('Invented Person') && !text.includes('Strength 45'), 'no values');
   const byPath = Object.fromEntries(report.requests.map((r) => [r.path, r]));
-  assert.equal(byPath['/v2/<exerpMemberId>/upcoming-workouts'].status, 200);
-  assert.equal(byPath['/v2/<exerpMemberId>/upcoming-workouts'].shape, '{upcoming:[1]{name}}');
-  assert.equal(byPath['/profile'].shape, '{firstName,market}');
+  assert.equal(byPath['/profile/v2/<exerpMemberId>/upcoming-workouts'].status, 200);
+  assert.equal(byPath['/profile/v2/<exerpMemberId>/upcoming-workouts'].shape, '{upcoming:[1]{name,type=upcoming-group-exercise}}');
+  assert.equal(byPath['/v2/booking-landing-page'].shape, '{items:[2]{type=GxOfferings,content:{title}}|{type=Recommendation,content:{list:[0]}}}');
   assert.equal(byPath['/v2/se/upcoming-workouts'].status, 404);
+  assert.ok(report.requests.length > 50 && report.requests.length <= 120, `${report.requests.length} requests`);
 });

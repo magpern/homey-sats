@@ -51,7 +51,7 @@ function makeMember({
     now: () => new Date(clock.t),
     timers,
     random: () => 0.5, // no jitter
-    clientFactory: (opts) => new SatsClient({ ...opts, transport }),
+    clientFactory: (opts) => new SatsClient({ ...opts, transport, diagnosticDelayMs: 0 }),
   });
   return {
     service, transport, timers, fired, logs, statuses, deviceStore,
@@ -242,14 +242,15 @@ test('endpoint not found runs diagnostics once and logs no personal data', async
     clock,
     handler: (call) => {
       if (call.url === TOKEN_URL) return { status: 200, body: tokenResponse() };
-      if (call.url.endsWith('/profile')) return { status: 200, body: { firstName: 'Invented Person' } };
+      if (call.url.endsWith('/v2/booking-landing-page')) return { status: 200, body: { firstName: 'Invented Person' } };
       return { status: 404, body: {} };
     },
   });
   await assert.rejects(a.service.refresh(), /No upcoming-workouts endpoint/);
   const diagLines = a.logs.filter((l) => l.startsWith('Diagnostics:'));
-  assert.ok(diagLines.some((l) => l.includes('GET /profile -> 200 keys {firstName}')));
-  assert.ok(diagLines.some((l) => l.includes('/v2/<exerpMemberId>/upcoming-workouts -> 404')));
+  assert.ok(diagLines.some((l) => l.includes('GET /v2/booking-landing-page -> 200 keys {firstName}')));
+  assert.ok(diagLines.some((l) => /paths tried, \d+ returned 404/.test(l)));
+  assert.ok(!diagLines.some((l) => l.includes('-> 404')), '404s are only counted');
   const all = a.logs.join('\n');
   for (const secret of ['Invented Person', '999999', 'user-0000-test', 'fake-refresh', 'eyJ']) {
     assert.ok(!all.includes(secret), `"${secret}" leaked`);
