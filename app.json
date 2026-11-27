@@ -747,6 +747,86 @@
             "filter": "driver_id=member"
           }
         ]
+      },
+      {
+        "id": "class_instructor_changed",
+        "title": {
+          "en": "A class changed instructor",
+          "sv": "Ett pass bytte instruktör"
+        },
+        "hint": {
+          "en": "Fires when SATS changes the instructor of a class you are booked on or on the waiting list for. Detected at the next poll.",
+          "sv": "Körs när SATS byter instruktör på ett pass du är bokad på eller står i kö till. Upptäcks vid nästa uppdatering."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "class_name",
+            "title": {
+              "en": "Class name",
+              "sv": "Passnamn"
+            },
+            "example": {
+              "en": "Strength 45",
+              "sv": "Strength 45"
+            }
+          },
+          {
+            "type": "string",
+            "name": "start",
+            "title": {
+              "en": "Start time",
+              "sv": "Starttid"
+            },
+            "example": {
+              "en": "06:30",
+              "sv": "06:30"
+            }
+          },
+          {
+            "type": "string",
+            "name": "centre",
+            "title": {
+              "en": "Centre",
+              "sv": "Center"
+            },
+            "example": {
+              "en": "Example Centre",
+              "sv": "Exempelcentret"
+            }
+          },
+          {
+            "type": "string",
+            "name": "old_instructor",
+            "title": {
+              "en": "Previous instructor",
+              "sv": "Tidigare instruktör"
+            },
+            "example": {
+              "en": "Instructor A",
+              "sv": "Instruktör A"
+            }
+          },
+          {
+            "type": "string",
+            "name": "new_instructor",
+            "title": {
+              "en": "New instructor",
+              "sv": "Ny instruktör"
+            },
+            "example": {
+              "en": "Instructor B",
+              "sv": "Instruktör B"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=member"
+          }
+        ]
       }
     ]
   },

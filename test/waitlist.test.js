@@ -19,7 +19,9 @@ const HOME = { lat: 59.3293, lon: 18.0686 };
  * One class whose booking state the tests change between polls.
  * "Cancelled" is not a state seen live; it stands in for whatever SATS sends.
  */
-function workout({ state = 'Booked', position = null, cancelled = false } = {}) {
+function workout({
+  state = 'Booked', position = null, cancelled = false, instructor = 'Instructor A',
+} = {}) {
   const item = (id, name, dateTime, durationInMinutes, memberBookingInfo) => ({
     type: 'upcoming-group-exercise',
     content: {
@@ -30,7 +32,7 @@ function workout({ state = 'Booked', position = null, cancelled = false } = {}) 
       club: {
         name: 'Example Centre North', id: 'c-1', fullName: 'Example Centre North (Example Town)', latitude: 59.342, longitude: 18.049,
       },
-      instructorName: 'Instructor A',
+      instructorName: instructor,
       bookingInfo: {
         capacity: 20, bookedCount: 20, waitingListCount: 4, memberBookingInfo,
       },
@@ -67,6 +69,7 @@ function member(initial) {
       onCancelled: fire('cancelled'),
       onPromoted: fire('promoted'),
       onPositionChanged: fire('positionChanged'),
+      onInstructorChanged: fire('instructorChanged'),
     },
     getStartOffsets: async () => [60],
     now: () => new Date(clock.t),
@@ -142,6 +145,34 @@ test('waiting-list position change fires once with old and new position', async 
   assert.equal(m.fired[0].tokens.new_position, 3);
   assert.equal(m.fired[0].tokens.class_name, 'Spinning 45');
   assert.equal(m.service.summary().bestWaitlistPosition, 3);
+});
+
+test('a new instructor fires "class changed instructor" once, with old and new name', async () => {
+  const m = member(workout());
+  await m.service.refresh();
+  m.setBody(workout({ instructor: 'Instructor B' }));
+  await m.service.refresh();
+  await m.service.refresh();
+  const changed = m.fired.filter((f) => f.kind === 'instructorChanged');
+  assert.equal(changed.length, 2, 'one per class: both test classes share the helper instructor');
+  assert.equal(changed[0].tokens.class_name, 'Spinning 45');
+  assert.equal(changed[0].tokens.old_instructor, 'Instructor A');
+  assert.equal(changed[0].tokens.new_instructor, 'Instructor B');
+});
+
+test('no instructor change for the same name in other case, a missing name, or a cancelled class', async () => {
+  const m = member(workout());
+  await m.service.refresh();
+  m.setBody(workout({ instructor: 'INSTRUCTOR A ' }));
+  await m.service.refresh();
+  m.setBody(workout({ instructor: '' }));
+  await m.service.refresh();
+  m.setBody(workout({ instructor: 'Instructor C' })); // previous poll had no name: nothing to compare
+  await m.service.refresh();
+  assert.deepEqual(m.fired.filter((f) => f.kind === 'instructorChanged'), []);
+  m.setBody(workout({ instructor: 'Instructor D', cancelled: true }));
+  await m.service.refresh();
+  assert.ok(!m.fired.some((f) => f.kind === 'instructorChanged' && f.tokens.class_name === 'Spinning 45'));
 });
 
 test('unknown positions never fire a position change', async () => {

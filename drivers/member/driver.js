@@ -21,6 +21,7 @@ class MemberDriver extends Homey.Driver {
     this.cancelledCard = this.homey.flow.getDeviceTriggerCard('class_cancelled');
     this.promotedCard = this.homey.flow.getDeviceTriggerCard('waitlist_promoted');
     this.positionCard = this.homey.flow.getDeviceTriggerCard('waitlist_position_changed');
+    this.instructorCard = this.homey.flow.getDeviceTriggerCard('class_instructor_changed');
 
     this.homey.flow.getConditionCard('class_within_km')
       .registerRunListener(async (args) => args.device.isWithinKm(args.km));

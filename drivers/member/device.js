@@ -49,6 +49,10 @@ class MemberDevice extends Homey.Device {
           this._timeline('position', tokens, booking);
           return driver.positionCard.trigger(this, tokens, state);
         },
+        onInstructorChanged: (tokens, state, booking) => {
+          this._timeline('instructor', tokens, booking);
+          return driver.instructorCard.trigger(this, tokens, state);
+        },
       },
       getStartOffsets: () => driver.getStartOffsets(this),
       onStatus: (status) => this._onStatus(status).catch(() => {}),
@@ -104,8 +108,8 @@ class MemberDevice extends Homey.Device {
       member: this.getName(),
       class: tokens.class_name,
       when,
-      old: tokens.old_position,
-      new: tokens.new_position,
+      old: tokens.old_position ?? tokens.old_instructor,
+      new: tokens.new_position ?? tokens.new_instructor,
     });
     this.homey.app.postTimeline(text).catch(() => {});
   }

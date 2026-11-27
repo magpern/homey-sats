@@ -19,6 +19,7 @@
   "timeline": {
     "promoted": "__member__: flyttad från väntelistan till bokad på __class__ (__when__)",
     "position": "__member__: köplats för __class__ (__when__) nu #__new__ (var #__old__)",
+    "instructor": "__member__: __class__ (__when__) har nu instruktör __new__ (var __old__)",
     "cancelled": "__member__: __class__ (__when__) ställdes in"
   },
   "widget": {
@@ -35,7 +36,7 @@
   "settings": {
     "title": "SATS (inofficiell)",
     "subtitle": "Medlemmar läggs till som enheter. Här finns bara inställningar för hela appen.",
-    "timeline": "Visa ändringar i väntelistan och inställda pass i Homeys tidslinje",
-    "timelineHint": "Flyttad från väntelistan till bokad, ändrad köplats och inställt pass."
+    "timeline": "Visa ändringar i väntelistan, byte av instruktör och inställda pass i Homeys tidslinje",
+    "timelineHint": "Flyttad från väntelistan till bokad, ändrad köplats, bytt instruktör och inställt pass."
   }
 }

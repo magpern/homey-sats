@@ -19,7 +19,8 @@
   "timeline": {
     "promoted": "__member__: moved from the waiting list to booked for __class__ (__when__)",
     "position": "__member__: waiting list for __class__ (__when__) now #__new__ (was #__old__)",
-    "cancelled": "__member__: __class__ (__when__) was cancelled"
+    "cancelled": "__member__: __class__ (__when__) was cancelled",
+    "instructor": "__member__: __class__ (__when__) now has instructor __new__ (was __old__)"
   },
   "widget": {
     "all_members": "All members",
@@ -35,7 +36,7 @@
   "settings": {
     "title": "SATS (unofficial)",
     "subtitle": "Members are added as devices. This page only has app-wide options.",
-    "timeline": "Post waiting-list changes and cancellations to the Homey timeline",
-    "timelineHint": "Moved from the waiting list to booked, waiting-list position changed, and class cancelled."
+    "timeline": "Post waiting-list changes, instructor changes and cancellations to the Homey timeline",
+    "timelineHint": "Moved from the waiting list to booked, waiting-list position changed, instructor changed, and class cancelled."
   }
 }
