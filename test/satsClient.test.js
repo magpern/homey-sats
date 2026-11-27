@@ -237,14 +237,15 @@ test('shapeOf shows booking-state enums but no values in lists about other booki
         instructorName: 'Instructor A',
         bookingInfo: { memberBookingInfo: { bookingState: 'BookedOnWaitingList', waitingListPosition: 3 } },
         followingBookings: [{ status: 'Booked', name: 'Member B' }],
+        location: { state: 'Stockholm' },
       },
     }],
   };
-  assert.equal(shapeOf(live), '{workouts:[1]{type=upcoming-group-exercise,content:{name,startTime:{…},instructorName,bookingInfo:{…},followingBookings:[1]}}}');
+  assert.equal(shapeOf(live), '{workouts:[1]{type=upcoming-group-exercise,content:{name,startTime:{…},instructorName,bookingInfo:{…},followingBookings:[1],location:{…}}}}');
   const deep = shapeOf(live, { maxDepth: 8 });
   assert.equal(deep, '{workouts:[1]{type=upcoming-group-exercise,content:{name,startTime:{timeZone,dateTime},instructorName,'
-    + 'bookingInfo:{memberBookingInfo:{bookingState=BookedOnWaitingList,waitingListPosition}},followingBookings:[1]{status,name}}}}');
-  for (const secret of ['Strength 45', 'Instructor A', 'Europe/Stockholm', '2026', 'Member B', '=Booked}']) {
+    + 'bookingInfo:{memberBookingInfo:{bookingState=BookedOnWaitingList,waitingListPosition}},followingBookings:[1]{status,name},location:{state}}}}');
+  for (const secret of ['Strength 45', 'Instructor A', 'Europe/Stockholm', '2026', 'Member B', '=Booked}', 'Stockholm']) {
     assert.ok(!deep.includes(secret), secret);
   }
 });

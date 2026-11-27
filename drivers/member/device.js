@@ -16,6 +16,7 @@ const OLD_CAPABILITIES = ['sats_next_class'];
 class MemberDevice extends Homey.Device {
   async onInit() {
     this._settings = this.getSettings();
+    await this._migrateSettings();
     await this._migrateCapabilities();
     const { driver } = this;
     this.service = new MemberService({
@@ -65,6 +66,25 @@ class MemberDevice extends Homey.Device {
     // Show cached values right away, and keep counts current as classes pass.
     this._onBookings(this.service.bookings).catch(() => {});
     this._capTimer = this.homey.setInterval(() => this._updateCapabilities().catch(() => {}), 5 * 60 * 1000);
+  }
+
+  /**
+   * Devices paired with an older version may never have saved the country: Homey then
+   * falls back to the default internally but shows "-" on the settings page.
+   * Write a valid value explicitly, once per device.
+   */
+  async _migrateSettings() {
+    if (this.getStoreValue('settingsVersion') >= 1) return;
+    const markets = ['se', 'no', 'dk', 'fi'];
+    const market = markets.includes(this._settings.market) ? this._settings.market : 'se';
+    try {
+      await this.setSettings({ market });
+      this._settings = { ...this._settings, market };
+      await this.setStoreValue('settingsVersion', 1);
+      this.log('Country setting saved explicitly');
+    } catch (err) {
+      this.error('Could not save the country setting');
+    }
   }
 
   async _migrateCapabilities() {
